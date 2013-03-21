@@ -1,35 +1,41 @@
 NET clk 	LOC = "T9"  ;	# 14mhz
 #NET clk LOC = T8;	#50MHZ
 # NET clk LOC= A9;	#30MHZ
-NET rst_n 	LOC = "B13" ;	# key 1
-NET srx_a	LOC = "G15" ;	# rs422A
-NET	srx_b   LOC =	H16;
-NET srx_c	LOC =	G16;
-NET srx_d	LOC =	H15;
-NET	pwm_a	LOC =	F13;
-NET pwm_b	LOC =	F14;
-NET stx_a	LOC =	G14;
-NET stx_b	LOC =	G13;
-NET stx_c	LOC =	H14;
-NET stx_d	LOC =	H13;
+NET rst_n 	LOC = H1 ;	# key 1
+NET   srx_c	LOC = "G15" ;	# rs422A
+NET	srx_d   LOC =	H16;
+NET srx_a	LOC =	G16;
+NET srx_b	LOC =	H15;
+NET	pwm_a	LOC =	F12;
+NET pwm_b	LOC =	E14;
+NET stx_c	LOC =	G14;
+NET stx_d	LOC =	G13;
+NET stx_a	LOC =	H14;
+NET stx_b	LOC =	H13;
+
 NET led1	LOC =	A11;
 NET led2	LOC =	A12;
+NET led3    LOC =   B13;
+NET led4    LOC =   B12;
+
+
 NET  sw1	LOC =	C16;
 NET  sw2	LOC =	D15;
 NET  sw3	LOC =	D16;
 NET  sw4	LOC =	E16;
 NET  sw5	LOC =	E15;
+NET  sw6    LOC =   D14;
 	
-NET reset_A	LOC =	C1;
-NET reset_B	LOC =	D1;
-NET	power_on_A LOC= D2;
-NET power_on_B LOC= D3;
+#NET reset_A	LOC =	C1;
+#NET reset_B	LOC =	D1;
+#NET	power_on_A LOC= D2;
+#NET power_on_B LOC= D3;
 
 ################################
-NET pulse_a	LOC = H1; #P19
-NET pulse_b	LOC = H3; #P20
-NET io_a		LOC = H2; #p17
-NET io_b		LOC = H4; #p18
+#NET pulse_a	LOC = H1; #P19
+#NET pulse_b	LOC = H3; #P20
+#NET io_a		LOC = H2; #p17
+#NET io_b		LOC = H4; #p18
 
 
 

@@ -24,7 +24,7 @@ module command(     clk,
                      rdr,
                      rf_counter,
                      switch,        // working status, switch==0 CPU A is the host else CPU B is the host
-                    
+                     status,
                      rf_pop,
                      tf_push,
                      tdr,
@@ -45,7 +45,7 @@ output rf_pop;
 output tf_push;
 output error;
 output com_swi;
-
+output [3:0] status;
 output [7:0] tdr;
 output reset_a_signal;
 output reset_b_signal;
@@ -299,8 +299,8 @@ reg cnt_a_en;
 reg cnt_b_en;
 reg cnt_a_rst;
 reg cnt_b_rst;
-reg [15:0] cnt_a;
-reg [15:0] cnt_b;
+reg [31:0] cnt_a;
+reg [31:0] cnt_b;
 always @(posedge clk or negedge rst_n)
 begin
   if(~rst_n)

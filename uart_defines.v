@@ -31,7 +31,7 @@
 
 
 `define OSC               14746    // 14746 khz
-`define RESET_PERIOD      1        // 1ms,  max 6ms
+`define RESET_PERIOD      10        // 10ms
 `define BAUD              38400
 
 

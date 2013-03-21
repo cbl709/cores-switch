@@ -16,7 +16,7 @@
 // Revision: 
 // Revision 0.01 - File Created
 // Additional Comments: 
-// test github
+//
 //////////////////////////////////////////////////////////////////////////////////
 `include "uart_defines.v"
 module top(
@@ -38,23 +38,26 @@ module top(
 	  
 	  led1,
 	  led2,
+	  led3,
+	  led4,
 	  
 	  sw1,
 	  sw2,
 	  sw3,
 	  sw4,
 	  sw5,
+	  sw6
 	
-	  reset_A,
-	  reset_B,
-	  power_on_A,
-	  power_on_B,
+	  //reset_A,
+	  //reset_B,
+	  //power_on_A,
+	  //power_on_B,
 	  
 	  //test signal////
-	  pulse_a,
-	  pulse_b,
-	  io_a,
-	  io_b
+	 // pulse_a,
+	 // pulse_b,
+	 // io_a,
+	 // io_b
     );
 input clk;
 input rst_n;
@@ -74,27 +77,32 @@ output stx_d;
 
 output led1;
 output led2;
+output led3;
+output led4;
 output sw1;
 output sw2;
 output sw3;
 output sw4;
 output sw5;
+output sw6;
 
-output reset_A;
-output reset_B;
-output power_on_A;
-output power_on_B;
+wire reset_A;
+wire reset_B;
+
+//output power_on_A;
+//output power_on_B;
 
 /////test signal///////
-output pulse_a;
-output pulse_b;
-output io_a;
-output io_b;
+//output pulse_a;
+//output pulse_b;
+//output io_a;
+//output io_b;
 
 parameter DL= (`OSC*1000)/(16*`BAUD);
 
 wire io_a;
 wire io_b;
+assign {led3,led4}={~io_a,~io_b};
 wire force_swi;
 
 
@@ -102,32 +110,19 @@ wire force_swi;
 wire [3:0]	status;
 
 reg switch;     // switch==0 switch to cpu A;
-				// switch==1 switch to cpu B;
+				    // switch==1 switch to cpu B;
 
-assign {sw1,sw2,sw3,sw4,sw5}= {~switch,~switch,~switch,~switch,~switch};
+assign {sw1,sw2,sw3,sw4,sw5,sw6}= {~switch,~switch,~switch,~switch,~reset_A,~reset_B};
 					
+
+
 								
 /////////////// CPU A and CPU B error detection //////////////////
 wire a_error;
 wire b_error;
 reg [7:0] a_err_num;	//  the number of CPU A error
 reg [7:0] b_err_num;
-///edit in 2013-3-5
-/*always@( posedge clk or negedge rst_n)
-begin
-	if(~rst_n)
-	 begin
-	  a_error<=1;  //change 1 to 0 edit in 2013-3-5
-	  b_error<=1;
-	 
-	 end
-	else begin
-		
-		 a_error <= ~io_a;
-		 b_error <= ~io_b;
-		
-	end	 
-end*/
+
 
 assign a_error = ~io_a;
 assign b_error = ~io_b;
@@ -258,7 +253,7 @@ begin
 end
 
 
-////////uart_a or uart_b send command frame to com_indentify module////// 
+///////uart_a or uart_b send command frame to com_indentify module////// 
 reg com_sel;	
 wire [`UART_FIFO_COUNTER_W-1:0] rf_count0;
 wire [`UART_FIFO_COUNTER_W-1:0] rf_count1;
@@ -388,6 +383,7 @@ command com_identify( .clk(clk),
 			   .rdr(rdr_ab),
 			   .rf_counter(rf_count_ab),
 				.switch(switch),
+			   .status(status),
 			   .rf_pop(rf_pop_ab),
 			   .tf_push(tf_push_cd),
 			   .tdr(tdr_cd),
