@@ -123,9 +123,9 @@ end
 wire io_tmp;
 assign io_tmp= freq_right&duty_right;
 
-//// io_tmp==1 for more than 50 period, io=1;
-reg [19:0] io_high_counter;
-reg [19:0] io_low_counter;
+//// io_tmp==1 for more than 100 period(0.1s), io=1;
+reg [31:0] io_high_counter;
+reg [31:0] io_low_counter;
 always@(posedge clk or negedge rst_n)
 begin
 	if(~rst_n) begin
@@ -143,11 +143,11 @@ begin
 			io_high_counter <= 0;
 			io_low_counter <= io_low_counter+1;
 		 end
-		if(io_high_counter >= 50*Period) begin
+		if(io_high_counter >= 100*Period) begin
 			io <=1;
 			io_high_counter <= 0;
 		end
-		if(io_low_counter >= 50*Period) begin
+		if(io_low_counter >= 100*Period) begin
 			io <=0;
 			io_low_counter <= 0;
 		end
