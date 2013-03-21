@@ -277,7 +277,7 @@ wait_status: begin
             tf_push<=0;
             rf_pop<=0;
             dly<= dly+1;
-            if(dly==2) begin
+            if(dly==3) begin
               status<=next_status;
               dly<= 0;
              end            
