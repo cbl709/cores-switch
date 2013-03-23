@@ -30,27 +30,27 @@ output				rf_overrun;
 output 				rf_error_bit;
 wire 				rf_push_pulse;
 
-reg	[3:0]	rstate;
-reg	[3:0]	rcounter16;
-reg	[2:0]	rbit_counter;
-reg	[7:0]	rshift;			// receiver shift register
-reg		rparity;		    // received parity
-reg		rparity_error;
-reg		rframing_error;		// framing error flag
+reg	[3:0]	rstate=4'd0;
+reg	[3:0]	rcounter16=4'd0;
+reg	[2:0]	rbit_counter=3'd0;
+reg	[7:0]	rshift=8'd0;			// receiver shift register
+reg		rparity=1'b0;		    // received parity
+reg		rparity_error=1'b0;
+reg		rframing_error=1'b0;		// framing error flag
 
-reg		rparity_xor;
-reg	[7:0]	counter_b;	    // counts the 0 (low) signals
-reg   rf_push_q; 
+reg		rparity_xor=1'b0;
+reg	[7:0]	counter_b=8'h00;	    // counts the 0 (low) signals
+reg   rf_push_q=1'b0; 
 
 // RX FIFO signals
-reg	    [`UART_FIFO_REC_WIDTH-1:0]	    		rf_data_in;
-wire	[`UART_FIFO_REC_WIDTH-1:0]	    				rf_data_out;
+reg	    [`UART_FIFO_REC_WIDTH-1:0]	    		rf_data_in=0;
+wire	[`UART_FIFO_REC_WIDTH-1:0]	    		rf_data_out;
 
-reg															rf_push;
-wire															rf_pop;
-wire															rf_overrun;
-wire	[`UART_FIFO_COUNTER_W-1:0]						rf_count;
-wire															rf_error_bit; 
+reg												rf_push=0;
+wire											rf_pop;
+wire											rf_overrun;
+wire	[`UART_FIFO_COUNTER_W-1:0]				rf_count;
+wire											rf_error_bit; 
 
 // RX FIFO instance
 uart_rfifo #(`UART_FIFO_REC_WIDTH) fifo_rx(
@@ -84,22 +84,9 @@ parameter  sr_wait1 				= 4'd9;
 parameter  sr_push 					= 4'd10;
 
 
-always @(posedge clk or negedge rst_n)
+always @(posedge clk )
 begin
-  if (~rst_n)
-  begin
-     rstate 				<= #1 sr_idle;
-	  rcounter16 			<= #1 0;
-	  rbit_counter 			<= #1 0;
-	  rparity_xor 			<= #1 1'b0;
-	  rframing_error 		<= #1 1'b0;
-	  rparity_error 		<= #1 1'b0;
-	  rparity 				<= #1 1'b0;
-	  rshift 				<= #1 0;
-	  rf_push 				<= #1 1'b0;
-	  rf_data_in 			<= #1 0;
-  end
-  else
+  
   if (enable)
   begin
 	case (rstate)
@@ -224,11 +211,8 @@ begin
   end  // if (enable)
 end // always of receiver 
 
-always @ (posedge clk or negedge rst_n)
+always @ (posedge clk )
 begin
-  if(~rst_n)
-    rf_push_q <= 0;
-  else
     rf_push_q <= #1 rf_push;
 end
 

@@ -19,7 +19,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 `include "uart_defines.v"
-module command(     clk,
+module command(      clk,
                      rst_n,
                      rdr,
                      rf_counter,
@@ -53,18 +53,18 @@ output power_on_A;
 output power_on_B;
 output force_swi;
 
-reg rf_pop;
-reg tf_push;
-reg [7:0] adder;
-reg com_swi;
-reg error;
+reg rf_pop       = 1'b0;
+reg tf_push      = 1'b0;
+reg [7:0] adder  = 8'h00;
+reg com_swi      = 1'b0;
+reg error        = 1'b0;
 reg [7:0] fifo [7:0]; // fifo store 1 command frame(8 bytes)
-reg [7:0] tdr;
-reg reset_a;
-reg reset_b;
-reg power_on_A;
-reg power_on_B;
-reg force_swi;
+reg [7:0] tdr    =8'h00;
+reg reset_a      =1'b0;
+reg reset_b      =1'b0;
+reg power_on_A   =1'b1;
+reg power_on_B   =1'b1; 
+reg force_swi    =1'b0;
 
 ///修改为one-hot编码，减少状态机译码电路--edit in 2013-3-5
 parameter idle          = 7'b0000001;
@@ -75,38 +75,14 @@ parameter check_frame   = 7'b0010000;
 parameter retransmit    = 7'b0100000;
 parameter wait_status   = 7'b1000000;
 
-reg [6:0] status;
-reg [6:0] next_status;
-reg [3:0] byte_count;
-reg [2:0] dly;
+reg [6:0] status        = idle;
+reg [6:0] next_status   = idle;
+reg [3:0] byte_count    = 4'd0;
+reg [2:0] dly           = 3'd0;
 
-always @(posedge clk or negedge rst_n)
+always @(posedge clk )
 begin
-if(~rst_n)
-  begin
-  status        <=idle;
-  rf_pop        <=0;
-  tf_push       <=0;
-  error         <=0;
-  adder          =0;
-  com_swi       <=0;
-  byte_count    <=0;
-  dly           <=0;
-  reset_a       <=0;
-  reset_b       <=0;
-  force_swi     <= 0;
-  power_on_A    <=0;
-  power_on_B    <=0;
-  fifo[0]       <=0;
-  fifo[1]       <=0;
-  fifo[2]       <=0;
-  fifo[3]       <=0;
-  fifo[4]       <=0;
-  fifo[5]       <=0;
-  fifo[6]       <=0;
-  fifo[7]       <=0;
-  end
- else begin
+
  //////////////////////check command frame ////////////////////////
  case (status)
  idle: begin 
@@ -287,33 +263,22 @@ wait_status: begin
 default    : status <= idle;
 
  endcase
- end
+ 
 end
 
 
 ///////CPU reset signal generation//////////////
 parameter Reset_Period=`OSC*`RESET_PERIOD;
-reg reset_a_signal;  // "1" reset CPU A
-reg reset_b_signal;
-reg cnt_a_en;
-reg cnt_b_en;
-reg cnt_a_rst;
-reg cnt_b_rst;
-reg [31:0] cnt_a;
-reg [31:0] cnt_b;
-always @(posedge clk or negedge rst_n)
+reg reset_a_signal = 1'b0;  // "1" reset CPU A
+reg reset_b_signal = 1'b0;
+reg cnt_a_en       = 1'b0;
+reg cnt_b_en       = 1'b0;
+reg cnt_a_rst      = 1'b1;
+reg cnt_b_rst      = 1'b1;
+reg [31:0] cnt_a   = 32'h00000000;
+reg [31:0] cnt_b   = 32'h00000000;
+always @(posedge clk )
 begin
-  if(~rst_n)
-   begin
-     reset_a_signal <= 0;
-     reset_b_signal <= 0;
-     cnt_a_en       <= 0;
-     cnt_a_rst      <= 1;
-     cnt_b_en       <= 0;
-     cnt_b_rst      <= 1;
-   end
-  else
-    begin
       if(reset_a) begin
         reset_a_signal <= 1;
         cnt_a_en       <= 1;
@@ -339,18 +304,11 @@ begin
             cnt_b_en       <= 0;
             cnt_b_rst      <= 1;
           end
-        
-    end
+    
 end
 
-always @(posedge clk or negedge rst_n)
+always @(posedge clk )
 begin
-  if(~rst_n)
-  begin
-   cnt_a <= 0;
-   cnt_b <= 0;
-  end
-  else begin
     if(cnt_a_en)
       cnt_a <= cnt_a+1;
     if(cnt_a_rst)
@@ -360,9 +318,6 @@ begin
       cnt_b <= cnt_b+1;
     if(cnt_b_rst)
       cnt_b <= 0;
-      
-      
-  end
 end
 
 

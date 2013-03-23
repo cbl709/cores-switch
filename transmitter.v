@@ -39,14 +39,14 @@ input 										enable;//启动发送器
 output 										stx_pad_o;//串行发送管脚
 output [`UART_FIFO_COUNTER_W-1:0] 			tf_count; //5 bits
 
-reg [2:0] 									tstate; //状态
-reg [4:0] 									counter;//脉冲计数
-reg [2:0] 									bit_counter;// counts the bits to be sent
-reg [6:0] 									shift_out;	// output shift register
-reg 										stx_o_tmp;//stx_pad_o 串行信号
-reg 										parity_xor;  // parity of the word
-reg 										tf_pop;
-reg 										bit_out;     //从管脚输出的位
+reg [2:0] 									tstate = 3'd0; //状态
+reg [4:0] 									counter= 5'd0;//脉冲计数
+reg [2:0] 									bit_counter= 3'd0;// counts the bits to be sent
+reg [6:0] 									shift_out  = 7'd0;	// output shift register
+reg 										stx_o_tmp  =1'b0;//stx_pad_o 串行信号
+reg 										parity_xor =1'b0;  // parity of the word
+reg 										tf_pop     =1'b0;
+reg 										bit_out    =1'b0;     //从管脚输出的位
 
 // TX FIFO instance
 //
@@ -77,20 +77,8 @@ parameter s_send_parity = 3'd3;//
 parameter s_send_stop   = 3'd4;//发送停止位
 parameter s_pop_byte    = 3'd5;//读FIFO状态
 
-always @(posedge clk or negedge rst_n)
+always @(posedge clk )
 begin
-  if (~rst_n)
-  begin
-	tstate      <= #1 s_idle;//状态寄??器
-	stx_o_tmp   <= #1 1'b1;//串行输出
-	counter     <= #1 5'b0;//脉冲计数器
-	shift_out   <= #1 7'b0;//移位寄存器
-	bit_out     <= #1 1'b0;//位寄存器与移位寄存器一起构成8位数??
-	parity_xor  <= #1 1'b0;//奇偶效验位
-	tf_pop      <= #1 1'b0;//读FIFO信号
-	bit_counter <= #1 3'b0;//位寄存器
-  end
-  else
   if (enable)//
    begin
 	case (tstate)//状态

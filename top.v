@@ -57,6 +57,8 @@ module top(
     );
 input clk;
 input rst_n;
+
+
 input srx_a;
 input srx_b;
 input srx_c;

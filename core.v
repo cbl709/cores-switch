@@ -107,48 +107,36 @@ assign {sw1,sw2,sw3,sw4,sw5,sw6}= {~switch,~switch,~switch,~switch,~reset_A,~res
 /////////////// CPU A and CPU B error detection //////////////////
 wire a_error;
 wire b_error;
-reg [7:0] a_err_num;	//  the number of CPU A error
-reg [7:0] b_err_num;
+reg [7:0] a_err_num = 8'h00;	//  the number of CPU A error
+reg [7:0] b_err_num = 8'h00;
 
 
 assign a_error = ~io_a;
 assign b_error = ~io_b;
 
 ////detect the rising edge of a_error and b_error
-reg a_error_d1; // a_error singnal delay 1 clk;
-reg b_error_d1;
-reg a_error_d2; // a_error singnal delay 1 clk;
-reg b_error_d2;
-always@( posedge clk or negedge rst_n)
-if(~rst_n)
-begin
-a_error_d1 <=0;
-b_error_d1 <=0;
-a_error_d2 <=0;
-b_error_d2 <=0;
-end
-else begin
+reg a_error_d1 = 1'b0; // a_error singnal delay 1 clk;
+reg b_error_d1 = 1'b0;
+reg a_error_d2 = 1'b0; // a_error singnal delay 1 clk;
+reg b_error_d2 = 1'b0;
+always@( posedge clk )
+ begin
 	a_error_d1 <= a_error;
 	a_error_d2 <= a_error_d1;
 	b_error_d1 <= b_error;
 	b_error_d2 <= b_error_d1;
 end
 
-always@( posedge clk or negedge rst_n )
+always@( posedge clk  )
 begin
-	if(~rst_n)
-	begin
-	a_err_num <=0;
-	b_err_num <=0;
-	end
-	else begin
 	if(a_error_d1&(~a_error_d2))   //  rising edge of a error
 	a_err_num	  <= a_err_num+1;
 	if(b_error_d1&(~b_error_d2))
 	b_err_num	  <= b_err_num+1; //   rising edge of b error
 	
 /////////////////counter overflow/////////////////////////////////
-	if((a_err_num==255) || (b_err_num==255)) begin // prevent  error num overflow
+	if((a_err_num==255) || (b_err_num==255)) 
+    begin // prevent  error num overflow
 		if(a_err_num> b_err_num) begin
 		  a_err_num <=1;
 		  b_err_num <=0;
@@ -163,9 +151,6 @@ begin
 	a_err_num <= 0;
 	b_err_num <= 0;
 	end
-	
-	
-	end		
 end
 
 /////////////switch decision/////////////////////////////////////////////////////////
@@ -214,8 +199,8 @@ end
 			 on		on    command error
 			 			*/
 
-reg led1;
-reg led2;
+reg led1 = 1'b1;
+reg led2 = 1'b1;
 wire error;
 always@ (switch or error )
 begin
@@ -241,29 +226,26 @@ end
 
 
 ///////communicate port A or communicate port B send command frame to com_indentify module////// 
-reg comm_sel;	
+reg comm_sel = 1'b0;	
 wire [`UART_FIFO_COUNTER_W-1:0] commA_rf_count;
 wire [`UART_FIFO_COUNTER_W-1:0] commB_rf_count;
 
-always@ (posedge clk or negedge rst_n)
+always@ (posedge clk )
 begin
-	if(~rst_n)
-	  comm_sel<=0;			               // comm_sel=0 use portA else use portB
-	 else begin                            // 先接收到大于等于8个字节指令的链路为主链路
+    // comm_sel=0 use portA else use portB
+    // 先接收到大于等于8个字节指令的链路为主链路
 		if((commA_rf_count >=8)&&(commB_rf_count<8))
 			comm_sel<=0;
 		if((commB_rf_count >=8)&&(commA_rf_count<8))
 			comm_sel<=1;
-	 
-	 end
 end
 
-reg [`UART_FIFO_COUNTER_W-1:0] com_count; //command bytes count
-reg [7:0]                      rec_command;
+reg [`UART_FIFO_COUNTER_W-1:0] com_count    =`UART_FIFO_COUNTER_W'd0; //command bytes count
+reg [7:0]                      rec_command  =8'h00;
 wire [7:0]                      commA_rdr;
 wire [7:0]                      commB_rdr;
-reg                            commA_rf_pop;
-reg                            commB_rf_pop;
+reg                            commA_rf_pop =1'b0;
+reg                            commB_rf_pop =1'b0;
 always@(comm_sel)
 begin
   case (comm_sel)
@@ -286,7 +268,7 @@ end
 
 
 /////////host CPU send data to comm port A and comm port B////////////////////
-reg  rec_data;
+reg  rec_data = 1'b1;
 wire srx_cpuA;
 wire srx_cpuB;
 wire stx_commA;

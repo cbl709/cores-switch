@@ -27,22 +27,20 @@ module uart(
 	output [`UART_FIFO_COUNTER_W-1:0] tf_count;
 	output [`UART_FIFO_COUNTER_W-1:0] rf_count;
 	
-	reg    [7:0] rdr;
+	reg    [7:0] rdr =8'h00;
 	output stx_pad_o;// uart out
 	
 /////// Frequency divider signals/////////////////////
 wire dlab;					//divisor latch access bit
-reg enable;
-reg [7:0]   dlc;
+reg enable =1'b0;
+reg [7:0]   dlc=8'h00;
 wire  		start_dlc;
 assign 		dlab= lcr[`UART_LC_DL];
 assign 		start_dlc= dlab&(dl!=0); // dlab==1 and dl!=0
 
-always @(posedge clk or negedge rst_n) 
+always @(posedge clk ) 
 begin
-	if (~rst_n) 
-		dlc <= #1 0;
-	else
+	
 	  if(start_dlc) begin
 		if (dlc==0)           
   			dlc <= #1 dl - 1;               // reload counter
@@ -52,11 +50,8 @@ begin
 end
 
 // Enable signal generation logic
-always @(posedge clk or negedge rst_n)
+always @(posedge clk )
 begin
-	if (~rst_n)
-		enable <= #1 1'b0;
-	else
 		if ( ~(|dlc) &start_dlc)     //  dlc==0 &start_dlc
 			enable <= #1 1'b1;
 		else

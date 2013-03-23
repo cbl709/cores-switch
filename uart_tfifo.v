@@ -29,9 +29,9 @@ output	[fifo_counter_w-1:0]	count;
 wire	[fifo_width-1:0]	data_out;
 
 // FIFO pointers
-reg	[fifo_pointer_w-1:0]	top;
-reg	[fifo_pointer_w-1:0]	bottom;
-reg	[fifo_counter_w-1:0]	count;
+reg	[fifo_pointer_w-1:0]	top=0;
+reg	[fifo_pointer_w-1:0]	bottom=0;
+reg	[fifo_counter_w-1:0]	count=0;
 wire [fifo_pointer_w-1:0] top_plus_1 = top + 1'b1;
 wire push_logic;
 assign push_logic=push&(count<fifo_depth);
@@ -46,16 +46,8 @@ raminfr #(fifo_pointer_w,fifo_width,fifo_depth) tfifo  //?
 		); 
 
 
-always @(posedge clk or negedge rst_n) // synchronous FIFO
+always @(posedge clk ) // synchronous FIFO
 begin
-	if (~rst_n)
-	begin
-		top		<= #1 0;
-		bottom		<= #1 1'b0;
-		count		<= #1 0;
-	end
-  else
-	begin
 		case ({push, pop})
 		2'b10 : if (count<fifo_depth)  // overrun condition
 			begin
@@ -73,7 +65,6 @@ begin
 		        end
     default: ;
 		endcase
-	end
 end   // always
 
 endmodule

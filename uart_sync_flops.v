@@ -28,27 +28,21 @@ output  [width-1:0]             sync_dat_o;             // synchronous data outp
 // Interal signal declarations
 //
 
-reg     [width-1:0]             sync_dat_o;
-reg     [width-1:0]             flop_0;
+reg     [width-1:0]             sync_dat_o=0;
+reg     [width-1:0]             flop_0=0;
 
 
 // first stage
-always @ (posedge clk_i or negedge rst_i)
+always @ (posedge clk_i )
 begin
-    if (~rst_i)
-        flop_0 <= #Tp {width{init_value}};
-    else
+    
         flop_0 <= #Tp async_dat_i;    
 end
 
 // second stage
-always @ (posedge clk_i or negedge rst_i)
+always @ (posedge clk_i )
 begin
-    if (~rst_i)
-        sync_dat_o <= #Tp {width{init_value}};
-    else if (stage1_rst_i)
-        sync_dat_o <= #Tp {width{init_value}};
-    else if (stage1_clk_en_i)
+    if (stage1_clk_en_i)
         sync_dat_o <= #Tp flop_0;       
 end
 

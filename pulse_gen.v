@@ -26,16 +26,11 @@ input clk;
 input rst_n;
 output pulse;
 parameter Period = 14746;
-reg pulse;
-reg [15:0] counter;
+reg pulse        = 1'b0;
+reg [15:0] counter=16'h0000;
 
-always@ (posedge clk or negedge rst_n)
+always@ (posedge clk )
 begin
-if(~rst_n) begin
-pulse <=0;
-counter <=0;
-end
-else begin
 counter <= counter+1;
 if(counter >= Period) begin
 	counter <=0;
@@ -45,5 +40,4 @@ if(counter == Period/2)
 	pulse<= ~pulse;
 end
 
-end
 endmodule
