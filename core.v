@@ -99,7 +99,7 @@ wire io_b;
 assign {led3,led4}={~io_a,~io_b};  
 assign {GPIO_A,GPIO_B}={~switch, switch};  
 
-reg switch;         // switch==0 switch to cpu A;
+reg switch= 1'b0;         // switch==0 switch to cpu A;
 				    // switch==1 switch to cpu B;
 
 assign {sw1,sw2,sw3,sw4,sw5,sw6}= {~switch,~switch,~switch,~switch,~reset_A,~reset_B};  
