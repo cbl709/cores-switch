@@ -102,7 +102,7 @@ assign {GPIO_A,GPIO_B}={~switch, switch};
 reg switch= 1'b0;         // switch==0 switch to cpu A;
 				    // switch==1 switch to cpu B;
 
-assign {sw1,sw2,sw3,sw4,sw5,sw6}= {~switch,~switch,~switch,~switch,~reset_A,~reset_B};  
+assign {sw1,sw2,sw3,sw4,sw5,sw6}= {~switch,~switch,~switch,~switch,~reset_B,~reset_A};  
 
 /////////////// CPU A and CPU B error detection //////////////////
 wire a_error;

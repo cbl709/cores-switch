@@ -175,6 +175,7 @@ check_frame:
                                 begin
                                 reset_a <=1;            // reset CPU A
                                 com_swi <=1;            // set CPU B to be the host CPU
+										  force_swi <= 1;         // added in 2013-3-25
                                 end
                                                         // CPU A is working, ignore this command
                             end
@@ -183,6 +184,7 @@ check_frame:
                                 begin
                                 reset_b <=1; // reset CPU B
                                 com_swi <=0; // set CPU A to be the host CPU
+										  force_swi <= 1;         // added in 2013-3-25
                         
                                 end
                                         // CPU B is working, ignore this command
@@ -191,11 +193,13 @@ check_frame:
                                     reset_a <= 1;
                                     reset_b <= 1;
                                     com_swi <= 0;
+												force_swi <= 1;         // added in 2013-3-25
                                 end
                         8'hba: begin
                                     reset_a <= 1;
                                     reset_b <= 1;
                                     com_swi <= 1;
+												force_swi <= 1;         // added in 2013-3-25
                                 end
                         8'haa: begin
                                     if(switch) begin  // CPU A is not working 
