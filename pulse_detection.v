@@ -117,11 +117,11 @@ begin
 			io_high_counter <= 0;
 			io_low_counter <= io_low_counter+1;
 		 end
-		if(io_high_counter >= 100*Period) begin
+		if(io_high_counter >= `DETECTION_TIME*Period) begin
 			io <=1;
 			io_high_counter <= 0;
 		end
-		if(io_low_counter >= 100*Period) begin
+		if(io_low_counter >=  `DETECTION_TIME*Period) begin
 			io <=0;
 			io_low_counter <= 0;
 		end

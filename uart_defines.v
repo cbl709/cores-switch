@@ -33,6 +33,7 @@
 `define OSC               14746    // 14746 khz
 `define RESET_PERIOD      10        // 10ms
 `define BAUD              38400
+`define DETECTION_TIME    500      //500ms
 
 
 
