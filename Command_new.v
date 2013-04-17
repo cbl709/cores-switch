@@ -107,7 +107,7 @@ wire [7 : 0] dout;
 fifo fifo(.clk(clk),
 	.din(din),
 	.rd_en(rd_en),
-	.rst(),
+	.rst(0),
 	.wr_en(wr_en),
 	.data_count(data_count),
 	.dout(dout),
@@ -190,8 +190,7 @@ begin
         cmd_fifo[5]       <=0;
         cmd_fifo[6]       <=0;
         cmd_fifo[7]       <=0;
-       
-      if(data_count>=7) begin
+      if(data_count==7) begin
             status      <= check_start1;  
             end
        end
@@ -313,20 +312,12 @@ check_frame:
                     endcase
                    
                   end
-                else begin
-                   status<=retransmit;
-                 
-                end
+               
+                  
             end //end of else   
-            
+            status<=idle; 
         end
 
-retransmit: begin
-                
-            next_status<=idle;      
-            status<= wait_status;   
-            end
-            
 wait_status: begin
            
             rd_en<=0;
