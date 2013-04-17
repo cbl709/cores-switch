@@ -233,10 +233,10 @@ wire [`UART_FIFO_COUNTER_W-1:0] commB_rf_count;
 always@ (posedge clk )
 begin
     // comm_sel=0 use portA else use portB
-    // 先接收到大于等于8个字节指令的链路为主链路
-		if((commA_rf_count >=8)&&(commB_rf_count<8))
+    // 先接收到大于等于1个字节指令的链路为主链路
+		if((commA_rf_count >=1)&&(commB_rf_count<1))
 			comm_sel<=0;
-		if((commB_rf_count >=8)&&(commA_rf_count<8))
+		if((commB_rf_count >=1)&&(commA_rf_count<1))
 			comm_sel<=1;
 end
 

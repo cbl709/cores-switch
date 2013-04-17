@@ -58,15 +58,101 @@ reg tf_push      = 1'b0;
 reg [7:0] adder  = 8'h00;
 reg com_swi      = 1'b0;
 reg error        = 1'b0;
-reg [7:0] fifo [7:0]; // fifo store 1 command frame(8 bytes)
+reg [7:0] cmd_fifo [7:0]; // fifo store 1 command frame(8 bytes)
 reg [7:0] tdr    =8'h00;
 reg reset_a      =1'b0;
 reg reset_b      =1'b0;
 reg power_on_A   =1'b1;
 reg power_on_B   =1'b1; 
 reg force_swi    =1'b0;
+//reg [10:0] byte_count =11'h0000;
+////通讯串口空闲时间计数寄存器
+reg [63:0] idle_cnt=64'h00000000;
+parameter MAX_IDLE_T = 16*4*10;
 
-///修改为one-hot编码，减少状态机译码电路--edit in 2013-3-5
+wire   data_flag;
+assign data_flag=(rf_counter>=`UART_FIFO_COUNTER_W'd1);
+
+wire time_out;
+assign time_out=(idle_cnt >= MAX_IDLE_T);
+reg time_out_d=1'b0;
+
+always@(posedge clk)
+begin
+ time_out_d <= time_out;
+end
+
+wire time_out_rise; //time out signal rising edge
+assign time_out_rise= time_out&~time_out_d;
+
+//////////////////
+/*reg    [10:0] addr;
+reg    [7:0] din;
+wire   [7:0] dout;
+reg           we;*/
+/*ram ram(
+	.addr(addr),
+	.clk(clk),
+	.din(din),
+	.dout(dout),
+	.we(we)
+    );*/
+reg [7:0] din;
+reg rd_en;
+wire rst;
+reg wr_en;
+wire [9 : 0] data_count;
+wire [7 : 0] dout;
+
+fifo fifo(.clk(clk),
+	.din(din),
+	.rd_en(rd_en),
+	.rst(),
+	.wr_en(wr_en),
+	.data_count(data_count),
+	.dout(dout),
+	.empty(),
+	.full()
+    );
+
+
+
+
+////接收到一个指令即转发给CPU
+always@ (posedge clk)
+begin
+ 
+ if(data_flag)
+   begin
+	 tf_push <= 1;
+	 rf_pop  <= 1;
+	 tdr     <= rdr;
+     din     <= rdr;
+     wr_en   <= 1;
+	end
+ if(wr_en)
+   wr_en <=0;
+ if(tf_push) begin
+    tf_push <=0;
+	end
+ if(rf_pop)
+    rf_pop  <=0;
+	 
+end
+
+
+
+always@(posedge clk)
+begin
+  if(~data_flag)
+    idle_cnt <= idle_cnt+1;
+  else
+    idle_cnt <= 0;
+end
+
+
+//////////////////////////////////////////////
+///////////cmd identify///////////////////////
 parameter idle          = 7'b0000001;
 parameter check_start1  = 7'b0000010;
 parameter check_start2  = 7'b0000100;
@@ -86,8 +172,7 @@ begin
  //////////////////////check command frame ////////////////////////
  case (status)
  idle: begin 
-        rf_pop        <=0;
-        tf_push       <=0;
+        rd_en        <=0;
         force_swi     <=0;
         adder          =0;
         reset_a       <=0;
@@ -97,71 +182,71 @@ begin
         power_on_B    <=1;
         force_swi     <= 0;
  
-        fifo[0]       <=0;
-        fifo[1]       <=0;
-        fifo[2]       <=0;
-        fifo[3]       <=0;
-        fifo[4]       <=0;
-        fifo[5]       <=0;
-        fifo[6]       <=0;
-        fifo[7]       <=0;
+        cmd_fifo[0]       <=0;
+        cmd_fifo[1]       <=0;
+        cmd_fifo[2]       <=0;
+        cmd_fifo[3]       <=0;
+        cmd_fifo[4]       <=0;
+        cmd_fifo[5]       <=0;
+        cmd_fifo[6]       <=0;
+        cmd_fifo[7]       <=0;
        
-      if(rf_counter>=`UART_FIFO_COUNTER_W'd8) begin
+      if(data_count>=7) begin
             status      <= check_start1;  
             end
        end
 check_start1: begin
                // error <= 0;
-                if(rdr==8'heb) 
+                if(dout==8'heb) 
                 next_status<=check_start2;              
                 else begin
                 next_status<=idle; 
                 error  <=1;              // added in 2013-3-7 
                 end   
-                rf_pop <=1;     
+                rd_en <=1;     
                 status <=wait_status;    // wait_status 是为了满足从串口中获取数据所需的时序   
               end
               
 check_start2:  begin    
-                  if(rdr==8'h90)         // frame head detect
+                  if(dout==8'h90)         // frame head detect
                    begin
                     next_status<=store_frame;
                     byte_count<=4'd2; 
-                    fifo[0]<=8'heb;
-                    fifo[1]<=8'h90;
+                    cmd_fifo[0]<=8'heb;
+                    cmd_fifo[1]<=8'h90;
                     end
                   else begin
                     next_status<=idle;
                     error<=1;
                   end
-                  rf_pop<=1;    
+                  rd_en<=1;    
                   status<=wait_status;        
                 end
                 
 store_frame:  begin 
               if(byte_count==4'd8) begin     //store frame finish 8 bytes
                 next_status<=check_frame;
-                adder= fifo[2]+fifo[3]+fifo[4]+fifo[5];
+                adder= cmd_fifo[2]+cmd_fifo[3]+cmd_fifo[4]+cmd_fifo[5];
                 end
               else begin 
-              fifo[byte_count] <= rdr;
+              cmd_fifo[byte_count] <= dout;
               byte_count       <=byte_count+1;
-              rf_pop           <=1;
+              rd_en           <=1;
               end
               status           <=wait_status;
           end
 check_frame: 
         begin               
-                if((adder!=0)||(fifo[6]!=8'h09)||(fifo[7]!=8'hd7)) // frame error
+                if((adder!=0)||(cmd_fifo[6]!=8'h09)||(cmd_fifo[7]!=8'hd7)) // frame error
                   begin
                   error<=1;
                   status <= idle;
                   end
                 else begin
                 error <= 0;         // command frame right
-                if(fifo[3]==8'hab)  // command to switch_board
+                if(cmd_fifo[3]==8'hab)  // command to switch_board
                   begin
-                    case(fifo[4])
+                    case(cmd_fifo[4])
                         8'h0a:begin 
                             com_swi <= 0;
                             force_swi <=1;
@@ -175,7 +260,6 @@ check_frame:
                                 begin
                                 reset_a <=1;            // reset CPU A
                                 com_swi <=1;            // set CPU B to be the host CPU
-										  force_swi <= 1;         // added in 2013-3-25
                                 end
                                                         // CPU A is working, ignore this command
                             end
@@ -184,7 +268,6 @@ check_frame:
                                 begin
                                 reset_b <=1; // reset CPU B
                                 com_swi <=0; // set CPU A to be the host CPU
-										  force_swi <= 1;         // added in 2013-3-25
                         
                                 end
                                         // CPU B is working, ignore this command
@@ -193,13 +276,11 @@ check_frame:
                                     reset_a <= 1;
                                     reset_b <= 1;
                                     com_swi <= 0;
-												force_swi <= 1;         // added in 2013-3-25
                                 end
                         8'hba: begin
                                     reset_a <= 1;
                                     reset_b <= 1;
                                     com_swi <= 1;
-												force_swi <= 1;         // added in 2013-3-25
                                 end
                         8'haa: begin
                                     if(switch) begin  // CPU A is not working 
@@ -230,7 +311,7 @@ check_frame:
                             power_on_B <=1;
                                end
                     endcase
-                    status<=retransmit;
+                   
                   end
                 else begin
                    status<=retransmit;
@@ -241,21 +322,14 @@ check_frame:
         end
 
 retransmit: begin
-                if(byte_count!=0) begin
-                tdr<=fifo[8-byte_count];
-                tf_push<=1;
-                byte_count<=byte_count-1;
-                next_status<= retransmit;
-                end
-                else
                 
-                next_status<=idle;      
+            next_status<=idle;      
             status<= wait_status;   
             end
             
 wait_status: begin
-            tf_push<=0;
-            rf_pop<=0;
+           
+            rd_en<=0;
             dly<= dly+1;
             if(dly==3) begin
               status<=next_status;
@@ -269,6 +343,7 @@ default    : status <= idle;
  endcase
  
 end
+
 
 
 ///////CPU reset signal generation//////////////
