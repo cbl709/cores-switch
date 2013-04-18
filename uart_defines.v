@@ -33,7 +33,8 @@
 `define OSC               14746    // 14746 khz
 `define RESET_PERIOD      10        // 10ms
 `define BAUD              38400
-`define DETECTION_TIME    500      //500ms
+`define DETECTION_TIME    500      //500ms，心跳检测判断时间
+`define GAP_T             4        //帧之间传输间隔时间不小于4字节时间长度
 
 
 
