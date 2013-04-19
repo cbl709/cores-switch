@@ -78,7 +78,7 @@ reg force_swi    =1'b0;
 reg [31:0] idle_cnt=32'h0000;
 parameter DL= (`OSC*1000)/(16*`BAUD);
 
-parameter MAX_IDLE_T =`GAP_T*160*DL;// 帧之间的传输间隔为GAP_T 字节
+parameter MAX_IDLE_T =`GAP_T*160*DL;// 帧之间的传输间隔为GAP_T 字节,8N1
 
 wire   data_flag;
 assign data_flag=|rf_counter;//只需判断rf_counter!=0
@@ -86,10 +86,10 @@ assign data_flag=|rf_counter;//只需判断rf_counter!=0
 reg time_out=0;
 
 
-reg [7:0] din;
-reg rd_en;
+reg [7:0] din=8'h00;
+reg rd_en=0;
 reg rst=0;
-reg wr_en;
+reg wr_en=0;
 wire [9 : 0] data_count;
 wire [7 : 0] dout;
 wire empty;
@@ -104,7 +104,7 @@ fifo fifo(.clk(clk),
 	.full()
     );
 
-////接收到一个指令即转发给CPU
+////接收到一个指令即转发给CPU,并压入指令FIFO（使用IP core生成的FIFO，1024 bytes）
 always@ (posedge clk)
 begin
  
@@ -116,6 +116,8 @@ begin
      din     <= rdr;
      wr_en   <= 1;
 	end
+    
+////保证只有效1个clk
  if(wr_en)
    wr_en <=0;
  if(tf_push) begin
@@ -148,16 +150,15 @@ end
 
 //////////////////////////////////////////////
 ///////////cmd identify///////////////////////
-parameter idle          = 7'b0000001;
-parameter check_start1  = 7'b0000010;
-parameter check_start2  = 7'b0000100;
-parameter store_frame   = 7'b0001000;
-parameter check_frame   = 7'b0010000; 
-parameter pop_data    = 7'b0100000;
-parameter wait_status   = 7'b1000000;
+parameter idle          = 6'b000001;
+parameter check_start1  = 6'b000010;
+parameter check_start2  = 6'b000100;
+parameter store_frame   = 6'b001000;
+parameter check_frame   = 6'b010000; 
+parameter wait_status   = 6'b100000;
 
-reg [6:0] status        = idle;
-reg [6:0] next_status   = idle;
+reg [5:0] status        = idle; //important!
+reg [5:0] next_status   = idle;
 reg [3:0] byte_count    = 4'd0;
 reg [2:0] dly           = 3'd0;
 
@@ -167,9 +168,9 @@ begin
  //////////////////////check command frame ////////////////////////
  case (status)
  idle: begin 
-        rd_en        <=0;
+        rd_en         <=0;
         force_swi     <=0;
-        adder          =0;
+        adder         <=0;
         reset_a       <=0;
         reset_b       <=0;
         byte_count    <=0;
@@ -187,14 +188,14 @@ begin
         cmd_fifo[6]       <=0;
         cmd_fifo[7]       <=0;
         
-           if((data_count==4'd8)&time_out)  
+           if((data_count==4'd8)&time_out)  //一个帧结束，接收到的是8字节指令
            begin
             next_status <= check_start1;
             rd_en  <= 1;
             status  <= wait_status;
             end
             
-          if(time_out&(data_count!=4'd8)) //接收到的指令不是8字节控制指令,复位清空指令FIFO
+          if(time_out&(data_count!=4'd8)) //接收到的指令不是8字节,复位清空指令FIFO
             begin
             rst <= 1;
             end
@@ -212,7 +213,7 @@ check_start1: begin
                 error  <=1;              // added in 2013-3-7
                 rst    <=1; 
                 end   
-                status <=wait_status;    // wait_status 是为了满足从串口中获取数据所需的时序   
+                status <=wait_status;    // wait_status 是为了满足获取数据时序
               end
               
 check_start2:  begin    
@@ -235,27 +236,23 @@ check_start2:  begin
 store_frame:  begin 
               if(byte_count==4'd8) begin     //store frame finish 8 bytes
                 next_status<=check_frame;
-                adder= cmd_fifo[2]+cmd_fifo[3]+cmd_fifo[4]+cmd_fifo[5];
+                adder              <= cmd_fifo[2]+cmd_fifo[3]+cmd_fifo[4]+cmd_fifo[5];
                 end
               else begin 
               cmd_fifo[byte_count] <= dout;
-              byte_count       <=byte_count+1;
-              rd_en            <=1;
+              byte_count           <=byte_count+1;
+              rd_en                <=1;
               end
-              status           <=wait_status;
+              status               <=wait_status;
           end
           
 check_frame: 
-        begin               
-                if((adder!=0)||(cmd_fifo[6]!=8'h09)||(cmd_fifo[7]!=8'hd7)) // frame error
-                  begin
-                  error<=1;
-                  status <= idle;
-                  end
-                else begin
-                error <= 0;         // command frame right
-                if(cmd_fifo[3]==8'hab)  // command to switch_board
-                  begin
+        begin                 
+            if((adder==0)&(cmd_fifo[6]==8'h09)&(cmd_fifo[7]==8'hd7))  // frame check right
+                begin
+                   error <=0;
+                   if (cmd_fifo[3]==8'hab) // switch board ID
+                    begin
                     case(cmd_fifo[4])
                         8'h0a:begin 
                             com_swi <= 0;
@@ -278,7 +275,6 @@ check_frame:
                                 begin
                                 reset_b <=1; // reset CPU B
                                 com_swi <=0; // set CPU A to be the host CPU
-                        
                                 end
                                         // CPU B is working, ignore this command
                                 end
@@ -302,7 +298,6 @@ check_frame:
                                     if(power_on_A) // CPU A is power on
                                     power_on_A <= 0; // turn off CPU A
                                 end
-        
                         8'hbb: begin
                                     if(~switch) begin
                                     power_on_B <=1;
@@ -321,23 +316,19 @@ check_frame:
                             power_on_B <=1;
                                end
                     endcase
-                   
                   end
-               
-                  
-            end //end of else   
-            status<=idle; 
+               end
+            else
+                error <=1;
+                status<=idle; 
         end
 
 wait_status: begin
               rd_en<=0;
               status<=next_status;
-                    
           end
             
-            
 default    : status <= idle;
-
  endcase
  
 end
