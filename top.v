@@ -107,6 +107,7 @@ wire [7:0] tdr_cpuAB;
 wire [`UART_FIFO_COUNTER_W-1:0] com_count;
 wire srx_c;
 wire srx_d;
+wire command_time_out;
 
 
 
@@ -147,7 +148,7 @@ core core(
             .tdr_cpuAB  (tdr_cpuAB),
             .com_count   (com_count),
             
-            
+            .command_time_out(command_time_out),
             
             
             .sw1        (sw1),
@@ -163,6 +164,7 @@ command com_identify( .clk(clk),
 			   .rst_n(rst_n),
 			   .rdr(rec_command),
 			   .rf_counter(com_count),
+               .command_time_out(command_time_out),
                .switch(switch),
 			   .status(status),
 			   .rf_pop(com_pop),

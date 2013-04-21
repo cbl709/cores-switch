@@ -25,6 +25,7 @@ module command(      clk,
                      rf_counter,
                      switch,        // working status, switch==0 CPU A is the host else CPU B is the host
                      status,
+                     command_time_out,
                      rf_pop,
                      tf_push,
                      tdr,
@@ -44,6 +45,7 @@ input clk;
 input rst_n;
 input [7:0] rdr;
 input switch;
+input command_time_out;
 input [`UART_FIFO_COUNTER_W-1:0] rf_counter;
 output rf_pop;
 output tf_push;
@@ -105,29 +107,38 @@ fifo fifo(.clk(clk),
     );
 
 ////接收到一个指令即转发给CPU,并压入指令FIFO（使用IP core生成的FIFO，1024 bytes）
+reg cycle=0;
 always@ (posedge clk)
 begin
  
- if(data_flag)
+ if(data_flag&command_time_out)
    begin
-	 tf_push <= 1;
-	 rf_pop  <= 1;
-	 tdr     <= rdr;
-     din     <= rdr;
-     wr_en   <= 1;
+   case(cycle) //为了满足时序,tf_push等信号只能保持一个clk
+	0: begin 
+          tf_push <= 1;
+	      rf_pop  <= 1;
+	      tdr     <= rdr;
+          din     <= rdr;
+          wr_en   <= 1;
+          cycle   <=1;
+          end
+   1: begin
+           tf_push <= 0;
+	      rf_pop  <= 0;
+          wr_en   <=0;
+          cycle   <=0;
+       end
+     
+   endcase
 	end
     
-////保证只有效1个clk
- if(wr_en)
-   wr_en <=0;
- if(tf_push) begin
-    tf_push <=0;
-	end
- if(rf_pop)
-    rf_pop  <=0;
-	 
-end
+ else begin
+   tf_push <=0;
+   rf_pop  <=0;
+   wr_en   <=0;
+ end
 
+end
 
 
 always@(posedge clk)

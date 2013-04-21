@@ -36,6 +36,7 @@ module core(
             tf_push_cpuAB, // input signal form command module
             tdr_cpuAB,
             com_count,
+            command_time_out,
             
             
             
@@ -91,6 +92,7 @@ output sw3;
 output sw4;
 output sw5;
 output sw6;
+output command_time_out;
 
 output switch;           
 
@@ -226,11 +228,63 @@ end
 
 
 ///////communicate port A or communicate port B send command frame to com_indentify module////// 
+
 reg comm_sel = 1'b0;	
 wire [`UART_FIFO_COUNTER_W-1:0] commA_rf_count;
 wire [`UART_FIFO_COUNTER_W-1:0] commB_rf_count;
+wire commandA_flag;
+wire commandB_flag;
 
-always@ (posedge clk )
+assign commA_flag = |commA_rf_count;
+assign commB_flag = |commB_rf_count;
+
+reg [63:0] commA_cnt =64'h0;
+reg [63:0] commB_cnt =64'h0;
+reg        time_out_A=0;
+reg        time_out_B=0;
+wire       command_time_out;
+assign     command_time_out= time_out_A&time_out_B;
+parameter MAX_IDLE_T =`GAP_T*160*DL;// 帧之间的传输间隔为GAP_T 字节,8N1
+
+always@ (posedge clk)
+begin
+  if(~commandA_flag) //链路A无数据
+   commA_cnt <= commA_cnt+1;
+   else
+    commA_cnt <=0;
+    
+  if(~commandB_flag) //链路B无数据
+   commB_cnt <= commB_cnt+1;
+   else
+    commB_cnt <=0;
+    
+  if(commA_cnt>= MAX_IDLE_T)
+    time_out_A <=1;
+  else
+    time_out_A <=0;
+    
+  if(commB_cnt>= MAX_IDLE_T)
+    time_out_B <=1;
+  else
+    time_out_B <=0;
+  
+end
+
+
+always@(command_time_out)
+begin
+ if(command_time_out)
+  begin
+    if(commA_rf_count>= commB_rf_count)
+     comm_sel <=0;
+    else
+     comm_sel <=1;
+  end
+    
+end
+
+
+/*always@ (posedge clk )
 begin
     // comm_sel=0 use portA else use portB
     // 先接收到大于等于1个字节指令的链路为主链路
@@ -238,7 +292,8 @@ begin
 			comm_sel<=0;
 		if((commB_rf_count >=1)&&(commA_rf_count<1))
 			comm_sel<=1;
-end
+end*/
+
 
 reg [`UART_FIFO_COUNTER_W-1:0] com_count    =`UART_FIFO_COUNTER_W'd0; //command bytes count
 reg [7:0]                      rec_command  =8'h00;
@@ -254,14 +309,14 @@ begin
 	       rec_command	    = commA_rdr;
 	       com_count     	= commA_rf_count;
 	       commA_rf_pop		= com_pop;
-	       commB_rf_pop		= 0;
+	       commB_rf_pop		= com_pop;
 			 
 	     end
      1'b1: begin              // use comm port B
            rec_command	    = commB_rdr;
 	       com_count     	= commB_rf_count;
 	       commB_rf_pop		= com_pop;
-	       commA_rf_pop		= 0;
+	       commA_rf_pop		= com_pop;
         end	
   endcase
 end

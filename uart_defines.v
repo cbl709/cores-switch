@@ -34,7 +34,7 @@
 `define RESET_PERIOD      10       // 10ms 重启信号持续时间
 `define BAUD              38400
 `define DETECTION_TIME    500      //500ms，心跳检测判断时间,状态连续持续DETECTION_TIME ms才能对心跳信号作出判断
-`define GAP_T             4        //帧之间传输间隔时间不小于4字节时间长度，8N1格式。如果格式更改需要在command_new文件中相应更改MAX_IDLE_T
+`define GAP_T             4        //帧之间传输间隔时间不小于4字节时间长度，8N1格式。如果格式更改需要在command_new，core文件中相应更改MAX_IDLE_T
 
 
 
