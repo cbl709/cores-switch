@@ -9,8 +9,9 @@ module uart(
 			tdr,
 			tf_push,
 			rf_pop,
+			rf_push_pulse,   // receive a new data
 			srx_pad_i, // uart in
-			stx_pad_o,// uart out
+			stx_pad_o, // uart out
 			tf_count,
 			rf_count,
 			rdr
@@ -26,6 +27,7 @@ module uart(
 	output [7:0] rdr;
 	output [`UART_FIFO_COUNTER_W-1:0] tf_count;
 	output [`UART_FIFO_COUNTER_W-1:0] rf_count;
+	output  rf_push_pulse;
 	
 	reg    [7:0] rdr =8'h00;
 	output stx_pad_o;// uart out
@@ -105,6 +107,7 @@ uart_receiver receiver(.clk(clk),
 					   .rst_n(rst_n),
 					   .lcr(lcr), 
 					   .rf_pop(rf_pop),
+						.rf_push_pulse(rf_push_pulse),
 					   .srx_pad_i(serial_in), 
 					   .enable(enable),  
 					   .rf_count(rf_count), 

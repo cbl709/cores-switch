@@ -114,7 +114,6 @@ wire command_time_out;
 
 core core(
             .clk        (clk),
-            .rst_n      (rst_n),
             .io_a       (io_a),
             .io_b       (io_b),
             .force_swi  (force_swi),          
@@ -161,11 +160,10 @@ core core(
             );
 
 command com_identify( .clk(clk),
-			   .rst_n(rst_n),
 			   .rdr(rec_command),
 			   .rf_counter(com_count),
-               .command_time_out(command_time_out),
-               .switch(switch),
+            .command_time_out(command_time_out),
+            .switch(switch),
 			   .status(status),
 			   .rf_pop(com_pop),
 			   .tf_push(tf_push_cpuAB),

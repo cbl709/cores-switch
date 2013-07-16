@@ -9,6 +9,7 @@ module uart_receiver (
 					rst_n, 
 					lcr, 
 					rf_pop,
+					rf_push_pulse,
 					srx_pad_i,
 					enable, 
 					rf_count, 
@@ -28,6 +29,7 @@ output	[`UART_FIFO_COUNTER_W-1:0]	rf_count;
 output	[`UART_FIFO_REC_WIDTH-1:0]	rf_data_out; //11 bits
 output				rf_overrun;
 output 				rf_error_bit;
+output            rf_push_pulse;
 wire 				rf_push_pulse;
 
 reg	[3:0]	rstate=4'd0;

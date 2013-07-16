@@ -2,7 +2,6 @@
 `include "uart_defines.v"
 module core(
             clk,
-            rst_n,
             io_a,
             io_b,
             force_swi, //指令切换指示，只有==1时切换板才会根据com_swi数据切换电路。否则根据心跳信号自动切换
@@ -50,8 +49,7 @@ module core(
             );
 parameter DL= (`OSC*1000)/(16*`BAUD);
 
-input clk;
-input rst_n;   
+input clk; 
 input io_a;
 input io_b;
 input force_swi;
@@ -232,11 +230,9 @@ end
 reg comm_sel = 1'b0;	
 wire [`UART_FIFO_COUNTER_W-1:0] commA_rf_count;
 wire [`UART_FIFO_COUNTER_W-1:0] commB_rf_count;
-wire commandA_flag;
-wire commandB_flag;
+wire commandA_flag; //接commandA串口的 rf-push-pulse，为1时表示接收到新的一字节数据
+wire commandB_flag; //接commandB串口的 rf-push-pulse，为1时表示接收到新的一字节数据
 
-assign commA_flag = |commA_rf_count;
-assign commB_flag = |commB_rf_count;
 
 reg [63:0] commA_cnt =64'h0;
 reg [63:0] commB_cnt =64'h0;
@@ -244,16 +240,17 @@ reg        time_out_A=0;
 reg        time_out_B=0;
 wire       command_time_out;
 assign     command_time_out= time_out_A&time_out_B;
-parameter MAX_IDLE_T =`GAP_T*160*DL;// 帧之间的传输间隔为GAP_T 字节,8N1
+parameter MAX_IDLE_T =`GAP_T*160*DL;// 帧之间的传输间隔为GAP-T 字节,8N1
 
+////如果链路在GAP-T(4)  字节内没有接收到新的数据，则置位time out
 always@ (posedge clk)
 begin
-  if(~commandA_flag) //链路A无数据
-   commA_cnt <= commA_cnt+1;
+  if(~commandA_flag) //链路A无接收到新数据 
+  commA_cnt <= commA_cnt+1;
    else
     commA_cnt <=0;
     
-  if(~commandB_flag) //链路B无数据
+  if(~commandB_flag) //链路B无接收到新数据
    commB_cnt <= commB_cnt+1;
    else
     commB_cnt <=0;
@@ -270,7 +267,7 @@ begin
   
 end
 
-
+////链路A B都time out判断接收到的数据帧字节数，判断是否需要切换链路
 always@(command_time_out)
 begin
  if(command_time_out)
@@ -282,17 +279,6 @@ begin
   end
     
 end
-
-
-/*always@ (posedge clk )
-begin
-    // comm_sel=0 use portA else use portB
-    // 先接收到大于等于1个字节指令的链路为主链路
-		if((commA_rf_count >=1)&&(commB_rf_count<1))
-			comm_sel<=0;
-		if((commB_rf_count >=1)&&(commA_rf_count<1))
-			comm_sel<=1;
-end*/
 
 
 reg [`UART_FIFO_COUNTER_W-1:0] com_count    =`UART_FIFO_COUNTER_W'd0; //command bytes count
@@ -347,6 +333,7 @@ uart comm_A(
 			.tdr(),
 			.tf_push(1'b0),
 			.rf_pop(commA_rf_pop),
+			.rf_push_pulse(commandA_flag),
 			.tf_count(),
 			.rf_count(commA_rf_count),
 			.srx_pad_i(srx_commA), // uart in
@@ -361,6 +348,7 @@ uart comm_B(
 			.tdr(),
 			.tf_push(1'b0),
 			.rf_pop(commB_rf_pop),
+			.rf_push_pulse(commandB_flag),
 			.tf_count(),
 			.rf_count(commB_rf_count),
 			.srx_pad_i(srx_commB), // uart in
