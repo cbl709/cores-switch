@@ -1,7 +1,7 @@
 `include "uart_defines.v"
 //Following is the Verilog code for a dual-port RAM with asynchronous read. 
 module raminfr   
-        (clk, we, top, bottom, dat_i, dat_o); 
+        (clk, we, top, bottom, data_in, data_out); 
 
 parameter addr_width = `UART_FIFO_POINTER_W;
 parameter data_width = 8;
@@ -11,21 +11,29 @@ input clk;
 input we;   
 input  [addr_width-1:0] top;    //top
 input  [addr_width-1:0] bottom; //bottom  
-input  [data_width-1:0] dat_i;   
-//output [data_width-1:0] spo;   
-output [data_width-1:0] dat_o;   
-reg    [data_width-1:0] ram [depth-1:0]; //定义ram深度16字节
+input  [data_width-1:0] data_in;    
+output [data_width-1:0] data_out;  
 
-wire [data_width-1:0]  dat_o;
-wire  [data_width-1:0] dat_i;   
-wire  [addr_width-1:0] top;   
-wire  [addr_width-1:0] bottom;   
+
  
+/*reg    [data_width-1:0] ram [depth-1:0]; //定义ram深度16字节
   always @(posedge clk) begin   
     if (we)   
-      ram[top] <= dat_i;   
+      ram[top] <= data_in;   
   end   
-//  assign spo = ram[a];   
-  assign dat_o = ram[bottom];   
+  assign data_out = ram[bottom]; */ 
+  
+  
+  dual_ram dual_ram(
+    .addra(top),
+    .addrb(bottom),
+    .clka(clk),
+    .clkb(clk),
+    .dina(data_in),
+    .doutb(data_out),
+    .wea(we));
+    
+
+   
 endmodule 
 

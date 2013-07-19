@@ -37,12 +37,12 @@ wire push_logic;
 assign push_logic=push&(count<fifo_depth);
 
 raminfr #(fifo_pointer_w,fifo_width,fifo_depth) tfifo  //?
-        (   .clk(clk), 
+        ( .clk(clk), 
 			.we(push_logic), 
 			.top(top), 
 			.bottom(bottom), 
-			.dat_i(data_in), 
-			.dat_o(data_out)
+			.data_in(data_in), 
+			.data_out(data_out)
 		); 
 
 

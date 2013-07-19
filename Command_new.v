@@ -20,6 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 `include "uart_defines.v"
 module command(      clk,
+                     
                      rdr,
                      rf_counter,
                      switch,        // working status, switch==0 CPU A is the host else CPU B is the host
@@ -33,7 +34,11 @@ module command(      clk,
                      reset_a_signal,
                      reset_b_signal,
                      power_on_A,
-                     power_on_B,                                             
+                     power_on_B,
+                     data_count,
+                     time_out,
+                     data_flag,
+                     rd_en,
                      force_swi  // force_swi=1 means a switch command is send to switch_board
                     );
 input clk;
@@ -52,6 +57,10 @@ output reset_b_signal;
 output power_on_A;
 output power_on_B;
 output force_swi;
+output [9:0] data_count;
+output time_out;
+output data_flag;
+output rd_en;
 
 reg rf_pop       = 1'b0;
 reg tf_push      = 1'b0;
@@ -59,15 +68,18 @@ reg [7:0] adder  = 8'h00;
 reg com_swi      = 1'b0;
 reg error        = 1'b0;
 reg [7:0] cmd_fifo [7:0]; // fifo store 1 command frame(8 bytes)
-reg [7:0] tdr    =8'h00;
 reg reset_a      =1'b0;
 reg reset_b      =1'b0;
 reg power_on_A   =1'b1;
 reg power_on_B   =1'b1; 
 reg force_swi    =1'b0;
 
+
 wire   data_flag;
 assign data_flag=|rf_counter;//只需判断rf_counter!=0
+
+reg time_out=0;
+
 
 reg [7:0] din=8'h00;
 reg rd_en=0;
@@ -76,43 +88,46 @@ reg wr_en=0;
 wire [9 : 0] data_count;
 wire [7 : 0] dout;
 wire empty;
-fifo fifo(
-   .clk(clk),
-	.din(din),
-	.rd_en(rd_en),
-	.rst(rst),
-	.wr_en(wr_en),
-	.data_count(data_count),
-	.dout(dout),
-	.empty(empty),
-	.full()
+fifo fifo(.clk(clk),
+    .din(din),
+    .rd_en(rd_en),
+    .rst(rst),
+    .wr_en(wr_en),
+    .data_count(data_count),
+    .dout(dout),
+    .empty(empty),
+    .full()
     );
 
-////接收到一个指令即转发给CPU,并压入指令备份FIFO（使用IP core生成的FIFO，1024 bytes）
-reg cycle=0;
+////接收到一个指令即转发给CPU,并压入指令FIFO（使用IP core生成的FIFO，1024 bytes）
+reg[2:0] cycle=0;
+assign tdr=rdr;         //
 always@ (posedge clk)
 begin
  
  if(data_flag&command_time_out)
    begin
    case(cycle) //为了满足时序,tf_push等信号只能保持一个clk
-	0: begin 
-         tf_push <= 1;
-	      rf_pop  <= 1;
-	      tdr     <= rdr;
+   0: begin
+         tf_push <= 0;
+          rf_pop  <= 0;
+          wr_en   <=0;
+          cycle   <=cycle+1;
+       end
+   1: begin   //这个延时是必须的
+        cycle <= cycle+1;
+      end
+     
+   2: begin 
+          tf_push <= 1;
+          rf_pop  <= 1;
           din     <= rdr;
           wr_en   <= 1;
-          cycle   <=1;
-          end
-   1: begin
-          tf_push <= 0;
-	      rf_pop  <= 0;
-          wr_en   <=0;
           cycle   <=0;
-       end
-     
+          end
+   
    endcase
-	end
+    end
     
  else begin
    tf_push <=0;
@@ -121,6 +136,7 @@ begin
  end
 
 end
+
 
 
 //////////////////////////////////////////////
@@ -163,19 +179,21 @@ begin
         cmd_fifo[6]       <=0;
         cmd_fifo[7]       <=0;
         
-		  if(command_time_out&~data_flag)     //链路A和链路B均time out，并且链路的接收FIFO已经被转发出去(数据量为0)，查看
-		    begin                             //此时备份数据fifo里面的数据帧字节数
-             if(data_count==4'd8)  //接收到的是8字节指令
-               begin
-                next_status <= check_start1;
-                rd_en  <= 1;
-                status  <= wait_status;
-               end
-             else //接收到的指令不是8字节,复位清空指令FIFO
-               rst <= 1;
-          end				
-      end
-   
+           if((data_count==4'd8)&command_time_out&~data_flag)  //一个帧结束，接收到的是8字节指令
+           begin
+            next_status <= check_start1;
+            rd_en  <= 1;
+            status  <= wait_status;
+            end
+            
+          if(command_time_out&(data_count!=4'd8)&~data_flag) //接收到的指令不是8字节,复位??空指令FIFO
+            begin
+            rst <= 1;
+            end
+          
+       end
+
+           
 check_start1: begin
                 if(dout==8'heb) begin
                 next_status<=check_start2;
@@ -293,6 +311,8 @@ check_frame:
                end
             else
                 error <=1;
+                
+                rst <=1;
                 status<=idle; 
         end
 
