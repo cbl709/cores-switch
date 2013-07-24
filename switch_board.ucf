@@ -4,7 +4,6 @@
 NET clk 	LOC = "T9"  ;	# 14.756mhz
 
 # NET clk LOC= A9;	#32MHZ
-NET rst_n 	LOC =   D2 ;	# 
 NET srx_a	LOC =   G15  ;	# rs422A
 NET	srx_b   LOC =	H16;
 NET srx_c	LOC =	G16;
