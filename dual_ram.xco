@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version K.31
-# Date: Mon Jul 15 06:56:13 2013
+# Date: Fri Jul 19 08:23:00 2013
 #
 ##############################################################
 #
@@ -35,7 +35,7 @@ SET vhdlsim = True
 SELECT Dual_Port_Block_Memory family Xilinx,_Inc. 6.3
 # END Select
 # BEGIN Parameters
-CSET component_name=tf_dual_ram
+CSET component_name=dual_ram
 CSET configuration_port_a=Write_Only
 CSET configuration_port_b=Read_Only
 CSET depth_a=1024
@@ -71,5 +71,5 @@ CSET write_mode_port_a=Read_After_Write
 CSET write_mode_port_b=Read_After_Write
 # END Parameters
 GENERATE
-# CRC: 5d5c6a18
+# CRC: 9900429e
 

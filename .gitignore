@@ -161,3 +161,20 @@ pip-log.txt
 
 # Mac crap
 .DS_Store
+
+#################
+## Xinlix ISE
+#################
+*.asy
+*.ngc
+*.veo
+*.txt
+*.vhd
+*.sym
+*.vho
+*.tcl
+*.lso
+*.xrpt
+*.prj
+*.xml
+*.ise

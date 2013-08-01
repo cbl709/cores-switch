@@ -104,8 +104,7 @@ wire [7:0] tdr_cpuAB;
 wire [`UART_FIFO_COUNTER_W-1:0] com_count;
 wire srx_c;
 wire srx_d;
-wire command_time_out;
-
+wire command_time_out_d;
 
 
 
@@ -118,15 +117,15 @@ core core(
             .error      (error),
             .reset_A    (reset_A),
             .reset_B    (reset_B),
-            .switch      (switch),
+            .switch     (switch),
             
             .led1       (led1),
             .led2       (led2),
             .led3       (led3),
             .led4       (led4),
                 
-                .GPIO_A     (GPIO_A),
-                .GPIO_B     (GPIO_B),
+            .GPIO_A     (GPIO_A),
+            .GPIO_B     (GPIO_B),
             
             .srx_commA  (srx_c),
             .srx_commB  (srx_d),
@@ -142,11 +141,10 @@ core core(
             .rec_command(rec_command),   // output to command module
             .tf_push_cpuAB(tf_push_cpuAB), // input signal form command module
             .tdr_cpuAB  (tdr_cpuAB),
-            .com_count   (com_count),
+            .com_count  (com_count),
             
-            .command_time_out(command_time_out),
-            
-            
+            .command_time_out_d(command_time_out_d),
+                        
             .sw1        (sw1),
             .sw2        (sw2),
             .sw3        (sw3),
@@ -159,7 +157,7 @@ core core(
 command com_identify( .clk(clk),
                .rdr(rec_command),
                .rf_counter(com_count),
-               .command_time_out(command_time_out),
+               .command_time_out_d(command_time_out_d),
                .switch(switch),
                .status(status),
                .rf_pop(com_pop),

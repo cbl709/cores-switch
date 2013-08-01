@@ -6,7 +6,7 @@ NET clk       LOC=A11;  #14.74MHZ
 #NET clk       LOC=B11;  #32MHZ
 
 NET srx_a	LOC =   A14  ;	# rs422A
-NET	srx_b   LOC =	A15;
+NET srx_b   LOC =	A15;
 NET srx_c	LOC =	B15;
 NET srx_d	LOC =	B16;
 

@@ -25,7 +25,7 @@ module command(      clk,
                      rf_counter,
                      switch,        // working status, switch==0 CPU A is the host else CPU B is the host
                      status,
-                     command_time_out,
+                     command_time_out_d,
                      rf_pop,
                      tf_push,
                      tdr,
@@ -44,7 +44,7 @@ module command(      clk,
 input clk;
 input [7:0] rdr;
 input switch;
-input command_time_out;
+input command_time_out_d;
 input [`UART_FIFO_COUNTER_W-1:0] rf_counter;
 output rf_pop;
 output tf_push;
@@ -76,12 +76,20 @@ reg force_swi    =1'b0;
 
 
 wire   data_flag;
+reg    data_flag_d=0;
 assign data_flag=|rf_counter;//只需判断rf_counter!=0
+
+always@(posedge clk)
+begin
+  data_flag_d <= data_flag;
+end
+
+
 
 reg time_out=0;
 
 
-reg [7:0] din=8'h00;
+wire [7:0] din;
 reg rd_en=0;
 reg rst=0;
 reg wr_en=0;
@@ -102,14 +110,15 @@ fifo fifo(.clk(clk),
 ////接收到一个指令即转发给CPU,并压入指令FIFO（使用IP core生成的FIFO，1024 bytes）
 reg[2:0] cycle=0;
 assign tdr=rdr;         //
+assign din=rdr;
+
 always@ (posedge clk)
 begin
- 
- if(data_flag&command_time_out)
+ if(data_flag&command_time_out_d)
    begin
    case(cycle) //为了满足时序,tf_push等信号只能保持一个clk
    0: begin
-         tf_push <= 0;
+          tf_push <= 0;
           rf_pop  <= 0;
           wr_en   <=0;
           cycle   <=cycle+1;
@@ -121,7 +130,6 @@ begin
    2: begin 
           tf_push <= 1;
           rf_pop  <= 1;
-          din     <= rdr;
           wr_en   <= 1;
           cycle   <=0;
           end
@@ -179,14 +187,14 @@ begin
         cmd_fifo[6]       <=0;
         cmd_fifo[7]       <=0;
         
-           if((data_count==4'd8)&command_time_out&~data_flag)  //一个帧结束，接收到的是8字节指令
+        if((data_count==4'd8)&command_time_out_d&~data_flag&data_flag_d)  //一个帧结束，接收到的是8字节指令
            begin
             next_status <= check_start1;
             rd_en  <= 1;
             status  <= wait_status;
             end
             
-          if(command_time_out&(data_count!=4'd8)&~data_flag) //接收到的指令不是8字节,复位??空指令FIFO
+          if(command_time_out_d&(data_count!=4'd8)&~data_flag&data_flag_d) //接收到的指令不是8字节,复位??空指令FIFO
             begin
             rst <= 1;
             end

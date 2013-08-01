@@ -18,8 +18,8 @@ module core(
             led3,
             led4,
                 
-                GPIO_A,
-                GPIO_B,
+            GPIO_A,
+            GPIO_B,
             
             srx_commA,
             srx_commB,
@@ -36,7 +36,7 @@ module core(
             tf_push_cpuAB, // input signal form command module
             tdr_cpuAB,
             com_count,
-            command_time_out,
+            command_time_out_d,
             
             
             
@@ -92,7 +92,7 @@ output sw3;
 output sw4;
 output sw5;
 output sw6;
-output command_time_out;
+output command_time_out_d;
 
 output switch;           
 
@@ -243,8 +243,14 @@ reg        time_out_B=0;
 reg [9:0]  data_num_A=0; //链路A收到的数据量
 reg [9:0]  data_num_B=0; //链路B收到的数据量
 wire       command_time_out;
+reg        command_time_out_d=0;
 assign     command_time_out= time_out_A&time_out_B;
 parameter MAX_IDLE_T =`GAP_T*160*DL;// 帧之间的传输间隔为GAP_T 字节,8N1
+
+always@(posedge clk)
+begin
+ command_time_out_d <= command_time_out;
+end
 
 always@ (posedge clk)
 begin
@@ -273,7 +279,7 @@ begin
   else
     time_out_B <=0;
     
-  if(command_time_out)
+  if(command_time_out_d)
    begin
      data_num_A <=0;
      data_num_B <=0;
@@ -282,7 +288,7 @@ begin
 end
 
 
-always@(command_time_out)
+always@(posedge clk)
 begin
  if(command_time_out)
   begin
@@ -290,8 +296,6 @@ begin
      comm_sel <=0;
     if(data_num_A< data_num_B)
      comm_sel <=1;
-     
-    
   end
     
 end
