@@ -1,0 +1,194 @@
+
+### 
+
+NET clk     LOC = A11  ;   # 24mhz
+
+NET srx_c   LOC =   AB6; #通讯链路A 接收端
+NET srx_d   LOC =   AB7; #       B 接收端
+NET pwm_a   LOC =   P18; # cpu a emios1
+NET pwm_b   LOC =   N18; # cpu b emios1
+
+NET led1    LOC =   B5;
+NET led2    LOC =   A5;
+NET led3    LOC =   B4;
+NET led4    LOC =   A4;
+NET led5    LOC =   F5;
+
+NET GPIO_A  LOC =   Y22; # CPU A GPIO205
+NET GPIO_B  LOC =   A17;
+
+NET  sw0    LOC =   L17;
+NET  sw1    LOC =   M18;
+NET  sw2    LOC =   P17;
+NET  sw3    LOC =   N17;    
+
+NET  power_off_A  LOC = AA6;
+NET  power_off_B  LOC = C5;
+
+############input switch #################
+net input_switch0<0> loc= G22; #rs422A+
+net input_switch0<1> loc= G19; #rs422A-
+net input_switch0<2> loc= H19; #rs422B+
+net input_switch0<3> loc= L20; #rs422B-
+
+#net input_switch0<4> loc= G22; #rs422A+
+#net input_switch0<5> loc= G22; #rs422A+
+#net input_switch0<6> loc= G22; #rs422A+
+#net input_switch0<7> loc= G22; #rs422A+
+
+net input_switch1<0> loc= N2; #emios23
+net input_switch1<1> loc= M1; #etpub14
+net input_switch1<2> loc= M2; #etpub18
+net input_switch1<3> loc= L2; #etpub20
+net input_switch1<4> loc= K1; #etpub21
+net input_switch1<5> loc= K2; #etpub24
+net input_switch1<6> loc= J1; #etpub25
+net input_switch1<7> loc= J2; #etpub27
+
+net input_switch2<0> loc= U3; #etpub28
+net input_switch2<1> loc= T3; #etpub31
+net input_switch2<2> loc= R3; #MDO7
+net input_switch2<3> loc= P1; #MDO8
+net input_switch2<4> loc= P2; #MDO10
+net input_switch2<5> loc= N1; #MDO11
+net input_switch2<6> loc= P3; #FPGA IO0
+net input_switch2<7> loc= N3; #FPGA IO1
+
+net input0_to_A<0> loc= W16; #A_RS422A+
+net input0_to_A<1> loc= W15; #A_RS422A-
+net input0_to_A<2> loc= V19; #A_RS422B+
+net input0_to_A<3> loc= W17; #A_RS422B-
+#net input0_to_A<4> loc=
+#net input0_to_A<5> loc=
+#net input0_to_A<6> loc=
+#net input0_to_A<7> loc=
+
+net input0_to_B<0> loc= K19; #B_RS422A+
+net input0_to_B<1> loc= G18; #B_RS422A-
+net input0_to_B<2> loc= J18; #B_RS422B+
+net input0_to_B<3> loc= H18; #B_RS422B-
+#net input0_to_B<4> loc=
+#net input0_to_B<5> loc=
+#net input0_to_B<6> loc=
+#net input0_to_B<7> loc=
+
+net input1_to_A<0> loc= R22;    #A_EMIOS23
+net input1_to_A<1> loc= AB17;   #A_ETPUB14
+net input1_to_A<2> loc= R21;    #A_ETPUB18
+net input1_to_A<3> loc= T21;    #A_ETPUB20
+net input1_to_A<4> loc= T22;    #A_ETPUB21
+net input1_to_A<5> loc= U21;    #A_ETPUB24
+net input1_to_A<6> loc= U22;    #A_ETPUB25
+net input1_to_A<7> loc= V21;    #A_ETPUB27
+
+net input2_to_A<0> loc= V22;    #A_ETPUB28
+net input2_to_A<1> loc= W22;    #A_ETPUB31
+net input2_to_A<2> loc= AB19;   #A_MDO7
+net input2_to_A<3> loc= AB18;   #A_MDO8
+net input2_to_A<4> loc= AA20;   #A_MDO10
+net input2_to_A<5> loc= R18;    #A_MDO11
+net input2_to_A<6> loc= Y2;     #A_FPGAIO0
+net input2_to_A<7> loc= AB5;    #A_FPGAIO1
+
+net input1_to_B<0> loc= C21;    #B_EMIOS23
+net input1_to_B<1> loc= G20;    #B_ETPUB14
+net input1_to_B<2> loc= C22;    #B_ETPUB18
+net input1_to_B<3> loc= C18;    #B_ETPUB20
+net input1_to_B<4> loc= M17;    #B_ETPUB21
+net input1_to_B<5> loc= A19;    #B_ETPUB24
+net input1_to_B<6> loc= B19;    #B_ETPUB25
+net input1_to_B<7> loc= A18;    #B_ETPUB27
+
+net input2_to_B<0> loc= B18;    #B_ETPUB28
+net input2_to_B<1> loc= B17;    #B_ETPUB31
+net input2_to_B<2> loc= J20;    #B_MDO7
+net input2_to_B<3> loc= H20;    #B_MDO8
+net input2_to_B<4> loc= B16;    #B_MDO10
+net input2_to_B<5> loc= A16;    #B_MDO11
+net input2_to_B<6> loc= C2;     #B_FPGAIO0
+net input2_to_B<7> loc= C4;     #B_FPGAIO1
+
+
+# output switch
+net output_switch0<0> loc= G21; #TS422A+
+net output_switch0<1> loc= H22; #TS422A-
+net output_switch0<2> loc= J19; #TS422B+
+net output_switch0<3> loc= K20; #TS422B-
+net output_switch0<4> loc= M20; #TS422C+
+net output_switch0<5> loc= N20; #TS422C-
+net output_switch0<6> loc= P20; #TS422D+
+net output_switch0<7> loc= R20; #TS422D-
+
+net output_switch1<0> loc=M3;   #FPGA_IO2
+net output_switch1<1> loc=L3;   #FPGA_IO3
+net output_switch1<2> loc=K3;   #FPGA_IO4
+net output_switch1<3> loc=J3;   #FPGA_IO5
+net output_switch1<4> loc=H3;   #FPGA_IO6
+net output_switch1<5> loc=G3;   #FPGA_IO7
+net output_switch1<6> loc=F3;   #FPGA_IO8
+net output_switch1<7> loc=E3;   #FPGA_IO9
+
+net output_switch2<0> loc=H4;   #FPGA_IO10
+net output_switch2<1> loc=G4;   #FPGA_IO11
+net output_switch2<2> loc=F4;   #FPGA_IO12
+net output_switch2<3> loc=J5;   #FPGA_IO13
+net output_switch2<4> loc=R5;   #FPGA_IO14
+net output_switch2<5> loc=P5;   #FPGA_IO15
+net output_switch2<6> loc=N5;   #FPGA_IO16
+net output_switch2<7> loc=M5;   #FPGA_IO17
+
+net  output0_from_A<0> loc= Y21;#A_TS422A+
+net  output0_from_A<1> loc= V20;#A_TS422A-
+net  output0_from_A<2> loc= J22;#A_TS422B+
+net  output0_from_A<3> loc= H21;#A_TS422B-
+net  output0_from_A<4> loc= J21;#A_TS422C+
+net  output0_from_A<5> loc= K22;#A_TS422C-
+net  output0_from_A<6> loc= L22;#A_TS422D+
+net  output0_from_A<7> loc= K21;#A_TS422D-
+
+net  output1_from_A<0> loc= Y1;#A_FPGA_IO2
+net  output1_from_A<1> loc= W1;#A_FPGA_IO3
+net  output1_from_A<2> loc= W2;#A_FPGA_IO4
+net  output1_from_A<3> loc= V1;#A_FPGA_IO5
+net  output1_from_A<4> loc= V2;#A_FPGA_IO6
+net  output1_from_A<5> loc= U1;#A_FPGA_IO7
+net  output1_from_A<6> loc= U2;#A_FPGA_IO8
+net  output1_from_A<7> loc= T1;#A_FPGA_IO9
+
+net  output2_from_A<0> loc= T2;#A_FPGA_IO10
+net  output2_from_A<1> loc= R1;#A_FPGA_IO11
+net  output2_from_A<2> loc= R2;#A_FPGA_IO12
+net  output2_from_A<3> loc= T4;#A_FPGA_IO13
+net  output2_from_A<4> loc= R4;#A_FPGA_IO14
+net  output2_from_A<5> loc= P4;#A_FPGA_IO15
+net  output2_from_A<6> loc= N4;#A_FPGA_IO16
+net  output2_from_A<7> loc= M4;#A_FPGA_IO17
+
+net  output0_from_B<0> loc= R19;#B_TS422A+
+net  output0_from_B<1> loc= T20;#B_TS422A-
+net  output0_from_B<2> loc= U19;#B_TS422B+
+net  output0_from_B<3> loc= U20;#B_TS422B-
+net  output0_from_B<4> loc= P19;#B_TS422C+
+net  output0_from_B<5> loc= N19;#B_TS422C-
+net  output0_from_B<6> loc= L19;#B_TS422D+
+net  output0_from_B<7> loc= M19;#B_TS422D-
+
+net  output1_from_B<0> loc= C1;  #B_FPGA_IO2
+net  output1_from_B<1> loc= D1;  #B_FPGA_IO3
+net  output1_from_B<2> loc= D2;  #B_FPGA_IO4
+net  output1_from_B<3> loc= E1;  #B_FPGA_IO5
+net  output1_from_B<4> loc= E2;  #B_FPGA_IO6
+net  output1_from_B<5> loc= F1;  #B_FPGA_IO7
+net  output1_from_B<6> loc= F2;  #B_FPGA_IO8
+net  output1_from_B<7> loc= G1;  #B_FPGA_IO9
+
+net  output2_from_B<0> loc= G2;#B_FPGA_IO10
+net  output2_from_B<1> loc= H1;#B_FPGA_IO11
+net  output2_from_B<2> loc= H2;#B_FPGA_IO12
+net  output2_from_B<3> loc= G5;#B_FPGA_IO13
+net  output2_from_B<4> loc= H5;#B_FPGA_IO14
+net  output2_from_B<5> loc= J4;#B_FPGA_IO15
+net  output2_from_B<6> loc= K4;#B_FPGA_IO16
+net  output2_from_B<7> loc= L5;#B_FPGA_IO17
+
+

@@ -20,12 +20,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 `include "uart_defines.v"
 module top(
+
       clk,
-      
       srx_a,
       srx_b,
-      srx_c,
-      srx_d,
+      srx_c, //通讯链路A
+      srx_d, //通讯链路B
       
       pwm_a,
       pwm_b,
@@ -39,19 +39,44 @@ module top(
       led2,
       led3,
       led4,
+      led5,
       
+      input_switch0,
+      input_switch1,
+      input_switch2,
+      input0_to_A,
+      input1_to_A,
+      input2_to_A,
+      input0_to_B,
+      input1_to_B,
+      input2_to_B,
+      
+      output_switch0,
+      output_switch1,
+      output_switch2,
+      output0_from_A,
+      output1_from_A,
+      output2_from_A,
+      output0_from_B,
+      output1_from_B,
+      output2_from_B,
+
+      
+      sw0,
       sw1,
       sw2,
       sw3,
-      sw4,
-      sw5,
-      sw6,
+      
+      reset_A_pin, // 低电平复位计算机A
+      reset_B_pin, // 低电平复位计算机B
+      
+      power_off_A,
+      power_off_B,
+     
       
       GPIO_A,
       GPIO_B,
       
-      pulse_a,
-      pulse_b
     
     );
 input clk;
@@ -74,18 +99,44 @@ output led1;
 output led2;
 output led3;
 output led4;
+output led5;
 
 output GPIO_A;
 output GPIO_B;
 
+output sw0;
 output sw1;
 output sw2;
 output sw3;
-output sw4;
-output sw5;
-output sw6;
-output pulse_a;
-output pulse_b;
+
+output  reset_A_pin; // 低电平复位计算机A
+output  reset_B_pin; // 低电平复位计算机B
+
+output  power_off_A;
+output  power_off_B;
+
+
+//////////swi io pin////
+input [7:0]       input_switch0;
+input [7:0]       input_switch1;
+input [7:0]       input_switch2;
+output [7:0]      input0_to_A;
+output [7:0]      input1_to_A;
+output [7:0]      input2_to_A;
+output [7:0]      input0_to_B;
+output [7:0]      input1_to_B;
+output [7:0]      input2_to_B;
+      
+output [7:0]      output_switch0;
+output [7:0]      output_switch1;
+output [7:0]      output_switch2;
+input [7:0]      output0_from_A;
+input [7:0]      output1_from_A;
+input [7:0]      output2_from_A;
+input [7:0]      output0_from_B;
+input [7:0]      output1_from_B;
+input [7:0]      output2_from_B;
+
 
 
 wire io_a;
@@ -106,6 +157,72 @@ wire srx_c;
 wire srx_d;
 wire command_time_out_d;
 
+wire power_on_A;
+wire power_on_B;
+
+assign {sw0,sw1,sw2,sw3}={switch,switch,switch,switch};
+
+/////该上电控制硬件相关，根据具体硬件电路修改
+assign {power_off_A,power_off_B}={~power_on_A,~power_on_B};
+
+////////switch io //////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+
+//////////switch 0//////////////////////////
+input_switch input_swi0(
+                    .clk(clk),
+                    .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
+                    .input_pin(input_switch0),
+                    .input_to_A(input0_to_A),
+                    .input_to_B(input0_to_B)
+                    );
+
+output_switch output_swi0(
+                    .clk(clk),
+                    .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
+                    .output_pin(output_switch0),
+                    .output_from_A(output0_from_A),
+                    .output_from_B(output0_from_B)
+                    );
+                    
+///////////switch1 switch2///////////////
+
+
+input_switch input_swi1(
+                    .clk(clk),
+                    .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
+                    .input_pin(input_switch1),
+                    .input_to_A(input1_to_A),
+                    .input_to_B(input1_to_B)
+                    );
+input_switch input_swi2(
+                    .clk(clk),
+                    .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
+                    .input_pin(input_switch2),
+                    .input_to_A(input2_to_A),
+                    .input_to_B(input2_to_B)
+                    );
+
+output_switch output_swi1(
+                    .clk(clk),
+                    .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
+                    .output_pin(output_switch1),
+                    .output_from_A(output1_from_A),
+                    .output_from_B(output1_from_B)
+                    );
+output_switch output_swi2(
+                    .clk(clk),
+                    .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
+                    .output_pin(output_switch2),
+                    .output_from_A(output2_from_A),
+                    .output_from_B(output2_from_B)
+                    );
+
+///////////////////////////////////end switch io/////////////////////////////////////////////////////////                    
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 
 core core(
@@ -123,6 +240,7 @@ core core(
             .led2       (led2),
             .led3       (led3),
             .led4       (led4),
+            .led5       (led5),
                 
             .GPIO_A     (GPIO_A),
             .GPIO_B     (GPIO_B),
@@ -143,14 +261,9 @@ core core(
             .tdr_cpuAB  (tdr_cpuAB),
             .com_count  (com_count),
             
-            .command_time_out_d(command_time_out_d),
-                        
-            .sw1        (sw1),
-            .sw2        (sw2),
-            .sw3        (sw3),
-            .sw4        (sw4),
-            .sw5        (sw5),
-            .sw6        (sw6)
+            .command_time_out_d(command_time_out_d)
+            
+            
             
             );
 
@@ -165,8 +278,8 @@ command com_identify( .clk(clk),
                .tdr(tdr_cpuAB),
                .error(error),   // receive an error command
                .com_swi(com_swi),
-                .reset_a_signal(reset_A),
-                .reset_b_signal(reset_B),
+                .reset_A_pin(reset_A_pin),
+                .reset_B_pin(reset_B_pin),
                 .power_on_A(power_on_A),
                 .power_on_B(power_on_B),
                 .force_swi(force_swi)

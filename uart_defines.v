@@ -30,7 +30,7 @@
 `define UART_FIFO_REC_WIDTH  11
 
 
-`define OSC               14746    // 14746 khz
+`define OSC               24000    // 24000 khz
 `define RESET_PERIOD      10       // 10ms 重启信号持续时间
 `define BAUD              38400
 `define DETECTION_TIME    500      //500ms，心跳检测判断时间,状态连续持续DETECTION_TIME ms才能对心跳信号作出判断

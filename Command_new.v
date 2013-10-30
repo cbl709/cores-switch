@@ -20,7 +20,6 @@
 //////////////////////////////////////////////////////////////////////////////////
 `include "uart_defines.v"
 module command(      clk,
-                     
                      rdr,
                      rf_counter,
                      switch,        // working status, switch==0 CPU A is the host else CPU B is the host
@@ -30,9 +29,9 @@ module command(      clk,
                      tf_push,
                      tdr,
                      error,     // receive an error command
-                     com_swi,   //com_swi ==0 switch to A else switch to B
-                     reset_a_signal,
-                     reset_b_signal,
+                     com_swi,   //cmmand swi,com_swi ==0 switch to A else switch to B
+                     reset_A_pin,
+                     reset_B_pin,
                      power_on_A,
                      power_on_B,
                      data_count,
@@ -49,14 +48,14 @@ input [`UART_FIFO_COUNTER_W-1:0] rf_counter;
 output rf_pop;
 output tf_push;
 output error;
-output com_swi;
+output com_swi;         //保存指令切换数据==0说明上次指令为切换到A机，否则是切换到B机
 output [3:0] status;
 output [7:0] tdr;
-output reset_a_signal;
-output reset_b_signal;
+output reset_A_pin;
+output reset_B_pin;
 output power_on_A;
 output power_on_B;
-output force_swi;
+output force_swi;       //指令切换标志，该标志为1时切换板根据com_swi的数值切换，否则根据AB机心跳和错误次数切换
 output [9:0] data_count;
 output time_out;
 output data_flag;
@@ -123,7 +122,7 @@ begin
           wr_en   <=0;
           cycle   <=cycle+1;
        end
-   1: begin   //这个延时是必须的
+   1: begin   //这个??时是必须的
         cycle <= cycle+1;
       end
      
@@ -275,17 +274,19 @@ check_frame:
                                 reset_b <=1; // reset CPU B
                                 com_swi <=0; // set CPU A to be the host CPU
                                 end
-                                        // CPU B is working, ignore this command
+                                             // CPU B is working, ignore this command
                                 end
                         8'hab: begin
-                                    reset_a <= 1;
-                                    reset_b <= 1;
-                                    com_swi <= 0;
+                                    reset_a   <= 1;
+                                    reset_b   <= 1;
+                                    com_swi   <= 0;
+                                    force_swi <= 1;
                                 end
                         8'hba: begin
-                                    reset_a <= 1;
-                                    reset_b <= 1;
-                                    com_swi <= 1;
+                                    reset_a   <= 1;
+                                    reset_b   <= 1;
+                                    com_swi   <= 1;
+                                    force_swi <= 1;
                                 end
                         8'haa: begin
                                     if(switch) begin  // CPU A is not working 
@@ -346,6 +347,9 @@ reg cnt_a_rst      = 1'b1;
 reg cnt_b_rst      = 1'b1;
 reg [31:0] cnt_a   = 32'h00000000;
 reg [31:0] cnt_b   = 32'h00000000;
+assign reset_A_pin=~reset_a_signal;
+assign reset_B_pin=~reset_b_signal;
+
 always @(posedge clk )
 begin
       if(reset_a) begin

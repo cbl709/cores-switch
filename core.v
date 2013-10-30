@@ -17,6 +17,7 @@ module core(
             led2,
             led3,
             led4,
+            led5,
                 
             GPIO_A,
             GPIO_B,
@@ -36,18 +37,10 @@ module core(
             tf_push_cpuAB, // input signal form command module
             tdr_cpuAB,
             com_count,
-            command_time_out_d,
-            
-            
-            
-            sw1,
-            sw2,
-            sw3,
-            sw4,
-            sw5,
-            sw6
+            command_time_out_d
             
             );
+            
 parameter DL= (`OSC*1000)/(16*`BAUD);
 
 input clk;
@@ -82,16 +75,13 @@ output led1;
 output led2;
 output led3;
 output led4;
+output led5;
 
 output GPIO_A;
 output GPIO_B;
 
-output sw1;
-output sw2;
-output sw3;
-output sw4;
-output sw5;
-output sw6;
+
+
 output command_time_out_d;
 
 output switch;           
@@ -102,9 +92,7 @@ assign {led3,led4}={~io_a,~io_b};
 assign {GPIO_A,GPIO_B}={~switch, switch};  
 
 reg switch= 1'b0;         // switch==0 switch to cpu A;
-                    // switch==1 switch to cpu B;
-
-assign {sw1,sw2,sw3,sw4,sw5,sw6}= {~switch,~switch,~switch,~switch,~reset_B,~reset_A};  
+                          // switch==1 switch to cpu B;
 
 /////////////// CPU A and CPU B error detection //////////////////
 wire a_error;
@@ -198,32 +186,20 @@ end
 /*          led1    led2 
              on     off   cpu A working
              off    on    cpu B working
-             on     on    command error
+             
+             led5 on  command error
+             led5 off command right
                         */
 
 reg led1 = 1'b1;
 reg led2 = 1'b1;
+reg led5 = 1'b1;
 wire error;
 always@ (switch or error )
 begin
-    case({switch, error})
-        2'b00: begin
-                    led1<=0;
-                    led2<=1;
-                 end
-        2'b01: begin
-                    led1<=0;
-                    led2<=0;
-                end
-        2'b10: begin
-                    led1<=1;
-                    led2<=0;
-                end
-        2'b11:begin
-                    led1<=0;
-                    led2<=0;
-                end
-    endcase     
+    led1= switch;
+    led2= ~switch;
+    led5= ~error;
 end
 
 
@@ -232,7 +208,7 @@ end
 reg comm_sel = 1'b0;    
 wire [`UART_FIFO_COUNTER_W-1:0] commA_rf_count;
 wire [`UART_FIFO_COUNTER_W-1:0] commB_rf_count;
-wire commandA_flag;  //连接链路A的rf-push-pulse信号，链路A接收到新数据后该信号保持高电平1个clk
+wire commandA_flag;  //连接链路A的rf-push-pulse信号，链??A接收到??数?莺蟾眯藕疟３指叩缙?个clk
 wire commandB_flag;
 
 
