@@ -30,8 +30,8 @@ module command(      clk,
                      tdr,
                      error,     // receive an error command
                      com_swi,   //cmmand swi,com_swi ==0 switch to A else switch to B
-                     reset_A_pin,
-                     reset_B_pin,
+                     reset_A,
+                     reset_B,
                      power_on_A,
                      power_on_B,
                      data_count,
@@ -51,8 +51,8 @@ output error;
 output com_swi;         //保存指令切换数据==0说明上次指令为切换到A机，否则是切换到B机
 output [3:0] status;
 output [7:0] tdr;
-output reset_A_pin;
-output reset_B_pin;
+output reset_A;        //高电平复位CPU A
+output reset_B;        //高电平复位CPU B
 output power_on_A;
 output power_on_B;
 output force_swi;       //指令切换标志，该标志为1时切换板根据com_swi的数值切换，否则根据AB机心跳和错误次数切换
@@ -172,8 +172,6 @@ begin
         reset_a       <=0;
         reset_b       <=0;
         byte_count    <=0;
-        power_on_A    <=1;
-        power_on_B    <=1;
         force_swi     <= 0;
         rst           <=0;
  
@@ -288,25 +286,27 @@ check_frame:
                                     com_swi   <= 1;
                                     force_swi <= 1;
                                 end
-                        8'haa: begin
+                        8'haa: begin                  //power on A, and set CPU A be host CPU
                                     if(switch) begin  // CPU A is not working 
                                     power_on_A <=1;
-                                    com_swi    <= 0;
+                                    com_swi    <=0;
+												force_swi  <=1;
                                     end
                                  end
                         8'h55: begin
-                                    if(power_on_A) // CPU A is power on
+                                  // if(switch)        //CPU A is not host CPU
                                     power_on_A <= 0; // turn off CPU A
                                 end
                         8'hbb: begin
-                                    if(~switch) begin
+                                    if(~switch) begin //power on B, and set CPU B be host CPU
                                     power_on_B <=1;
                                     com_swi    <= 1;
                                     end
                                 end
                         8'h44: begin
-                                    if(power_on_B) // CPU B is power on
+                                   // if(~switch)      //CPU B is not host CPU
                                     power_on_B <= 0; // turn off CPU B
+												
                                 end
                       default: begin
                             com_swi <=0;
@@ -347,8 +347,8 @@ reg cnt_a_rst      = 1'b1;
 reg cnt_b_rst      = 1'b1;
 reg [31:0] cnt_a   = 32'h00000000;
 reg [31:0] cnt_b   = 32'h00000000;
-assign reset_A_pin=~reset_a_signal;
-assign reset_B_pin=~reset_b_signal;
+assign reset_A=reset_a_signal;
+assign reset_B=reset_b_signal;
 
 always @(posedge clk )
 begin

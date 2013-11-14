@@ -8,8 +8,8 @@ module core(
             force_swi, //指令切换指示，只有==1时切换板才会根据com_swi数据切换电路。否则根据心跳信号自动切换
             com_swi,   //command_switch,保存指令切换数据, ==0 指令切换到A，==1 切换到B
             error,
-            reset_A,
-            reset_B,
+          // reset_A,
+          //  reset_B,
             
             switch,
             
@@ -50,8 +50,8 @@ input io_b;
 input force_swi;
 input com_swi;
 input error;   
-input reset_A;
-input reset_B;
+//input reset_A;
+//input reset_B;
 
 input tf_push_cpuAB;
 input com_pop;
