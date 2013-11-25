@@ -34,12 +34,16 @@ module top(
       stx_b,
       stx_c,
       stx_d,
+        
+        //rec_cmdA, //切换板转发的指令，通过232(moxa com7)输出,作为调试接口使用
+        //rec_cmdB, //切换板转发的指令，通过232(moxa com8)输出,作为调试接口使用
       
       led1,
       led2,
       led3,
       led4,
       led5,
+     // led6, //test led
       
       input_switch0,
       input_switch1,
@@ -77,7 +81,8 @@ module top(
       GPIO_A,
       GPIO_B,
       
-      ////共享内存EBI信号//////
+      ////共享内??EBI信号//////
+	
       A_clkout,
       A_cs_n,
       A_oe_n,
@@ -87,12 +92,12 @@ module top(
       A_ebi_addr,  // connect to A31~A8 
       
       B_clkout,
-		B_cs_n,
+      B_cs_n,
       B_oe_n,
       B_we_n,
       B_rd_wr,
       B_ebi_data,  // connect to D31~D0
-      B_ebi_addr  // connect to A31~A8 
+      B_ebi_addr  // connect to A31~A8
       
     
     );
@@ -110,13 +115,15 @@ output stx_a;
 output stx_b;
 output stx_c;
 output stx_d;
-
+//output rec_cmdA;
+//output rec_cmdB;
 
 output led1;
 output led2;
 output led3;
 output led4;
 output led5;
+//output led6;
 
 output GPIO_A;
 output GPIO_B;
@@ -126,7 +133,7 @@ output sw1;
 output sw2;
 output sw3;
 
-output  reset_A_pin_n; // 低电平复位计算机A
+output  reset_A_pin_n; // 低电平复位计算?鶤
 output  reset_B_pin_n; // 低电平复位计算机B
 
 output  power_on_A;
@@ -160,6 +167,7 @@ input [7:0]      output2_from_B;
 
 
 ////共享内存EBI信号//////
+
 input            A_clkout;
 input            A_cs_n;
 input            A_oe_n;
@@ -174,7 +182,7 @@ input            B_oe_n;
 input [3:0]      B_we_n;
 input            B_rd_wr;
 inout [31:0]     B_ebi_data;  // connect to D31~D0
-input [23:0]     B_ebi_addr;  // connect to A31~A8 
+input [23:0]     B_ebi_addr;  // connect to A31~A8 */
 
 
 
@@ -206,22 +214,34 @@ assign {sw0,sw1,sw2,sw3}={switch,switch,switch,switch};
 assign {reset_A_pin_n,reset_B_pin_n}={~reset_A,~reset_B};
 
 //////////////////CPU A CPU B共享内存代码//////////////////////////////
+
+
 ////cpu and fpga inout port    
 wire A_re_o;
 wire A_we_o;
 wire B_re_o;
 wire B_we_o; 
+
 wire [31:0] A_read_data;
 wire [31:0] B_read_data;
+
+wire [31:0] A_write_data;
+wire [31:0] B_write_data;
+
+wire [31:0] A_out_data;
+wire [31:0] B_out_data;
+
 assign A_write_data    = A_ebi_data;
-assign A_ebi_data[31:0]= A_re_o?A_read_data: 32'hzzzzzzzz;
+assign A_ebi_data[31:0]= A_re_o? A_read_data:32'hzzzzzzzz;
 
 assign B_write_data    = B_ebi_data;
-assign B_ebi_data[31:0]= B_re_o?B_read_data: 32'hzzzzzzzz;
+assign B_ebi_data[31:0]= B_re_o? B_read_data:32'hzzzzzzzz;
 
 wire [21:0] A_addr;
 wire [21:0] B_addr;
-ppc_interface  CPUA_interface (  .clk(A_clkout),
+
+ppc_interface  CPUA_interface (  
+                            .clk(A_clkout),
                             .cs_n(A_cs_n),
                             .oe_n(A_oe_n),
                             .we_n(A_we_n),
@@ -232,7 +252,8 @@ ppc_interface  CPUA_interface (  .clk(A_clkout),
                             .we_o(A_we_o)
                     );
                     
-ppc_interface  CPUB_interface (  .clk(B_clkout),
+ppc_interface  CPUB_interface (  
+                            .clk(B_clkout),
                             .cs_n(B_cs_n),
                             .oe_n(B_oe_n),
                             .we_n(B_we_n),
@@ -249,16 +270,16 @@ share_memory share_memory(
                     .A_read_data(A_read_data),
                     .A_write_data(A_write_data),
                     .A_re(A_re_o),
-                    .A_we(A_we_o),
-                    
+                    .A_we(A_we_o),                                                        
                     .B_clk(B_clkout),
                     .B_addr(B_addr),
                     .B_read_data(B_read_data),
                     .B_write_data(B_write_data),
                     .B_re(B_re_o),
                     .B_we(B_we_o)
-                   );
+                   );              
 
+                   
 
 ////////switch io //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -319,6 +340,7 @@ output_switch output_swi2(
 
 core core(
             .clk        (clk),
+				.rst_n      (1),
             .io_a       (io_a),
             .io_b       (io_b),
             .force_swi  (force_swi),          
@@ -340,10 +362,11 @@ core core(
          //  .stx_commA  (stx_c),
          //   .stx_commB  (stx_d),
             
-         //   .srx_cpuA   (srx_a),
-         //   .srx_cpuB   (srx_b),
-         //   .stx_cpuA   (stx_a),
-         //   .stx_cpuB   (stx_b),
+        
+             .srx_cpuA   (1),
+             .srx_cpuB   (1),
+         //   .stx_cpuA   (rec_cmdA),//转发接收到的数据
+         //   .stx_cpuB   (rec_cmdB),
             
             .com_pop    (com_pop),       //command pop, input signal from command module
             .rec_command(rec_command),   // output to command module
@@ -360,7 +383,6 @@ command com_identify( .clk(clk),
                .rf_counter(com_count),
                .command_time_out_d(command_time_out_d),
                .switch(switch),
-               .status(status),
                .rf_pop(com_pop),
                .tf_push(tf_push_cpuAB),
                .tdr(tdr_cpuAB),
@@ -375,11 +397,11 @@ command com_identify( .clk(clk),
      
     
 pulse_detection CPU_A_PWM (.clk(clk),
-                            .pwm(pwm_a),
+                            .pwm(1),
                             .io(io_a)
                             );   
 pulse_detection CPU_B_PWM (.clk(clk),
-                            .pwm(pwm_b),
+                            .pwm(1),
                             .io(io_b)
                             );   
                             

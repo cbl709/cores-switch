@@ -3,7 +3,8 @@
 `define CPUA_MEM_BEGIN  22'h2000  //CPUA 可写的2048(512*4)字节地址 0x22008000
 `define CPUA_MEM_END    22'h21ff  //                     
 `define CPUB_MEM_BEGIN  22'h2200  //CPUB 可写的2048字节地址 0x22008800
-`define CPUB_MEM_END    22'h23ff  //                                   
+`define CPUB_MEM_END    22'h23ff  //      
+`define SWITCH_BOARD_MEM 22'h2400 // 切换板信息空间 0x2209000                             
 
 module share_memory(
                     A_clk,
@@ -35,12 +36,21 @@ input  [31:0] B_write_data;
 input         B_re;
 input         B_we;
 
+
+reg [31:0] A_read_data;
+reg [31:0] B_read_data;
+
+wire [31:0] A_out_data;
+wire [31:0] B_out_data;
+
+reg  [31:0] A_write_data_reg;
+reg  [31:0] B_write_data_reg;
+
 wire CPUA_we;
 wire CPUB_we;
 
-assign CPUA_we= A_we&&(A_addr>=`CPUA_MEM_BEGIN)&&(A_addr<=`CPUA_MEM_END);
-assign CPUB_we= B_we&&(B_addr>=`CPUB_MEM_BEGIN)&&(B_addr<=`CPUB_MEM_END);
-
+assign CPUA_we= A_we&(A_addr>=`CPUA_MEM_BEGIN)&(A_addr<=`CPUA_MEM_END);
+assign CPUB_we= B_we&(B_addr>=`CPUB_MEM_BEGIN)&(B_addr<=`CPUB_MEM_END);
 
 
  share_mem  share_mem(
@@ -50,11 +60,29 @@ assign CPUB_we= B_we&&(B_addr>=`CPUB_MEM_BEGIN)&&(B_addr<=`CPUB_MEM_END);
                      .clkb(B_clk),
                      .dina(A_write_data),
                      .dinb(B_write_data),
-                     .douta(A_read_data),
-                     .doutb(B_read_data),
+                     .douta(A_out_data),
+                     .doutb(B_out_data),           
                      .wea(CPUA_we),
                      .web(CPUB_we)
                      );
+                     
+reg [31:0] switch_board_info=32'hab; //切换板信息空间，CPU A B 只能对该空间进行读取操作 
+
+always@(posedge A_clk)
+begin
+ //if(A_addr>= `SWITCH_BOARD_MEM)
+ //  A_read_data <= switch_board_info;
+ // else
+   A_read_data <=A_out_data;
+end
+
+always@(posedge B_clk)
+begin
+// if(B_addr>= `SWITCH_BOARD_MEM)
+//   B_read_data <= switch_board_info;
+// else
+ B_read_data <= B_out_data;
+end
 
 
 
