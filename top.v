@@ -80,15 +80,7 @@ module top(
       
       GPIO_A,
       GPIO_B,
-<<<<<<< HEAD
-		
-	////EBI信号//////
-        
-=======
-      
-      ////共享内??EBI信号//////
-	
->>>>>>> 367bcb4e80096f9d399f969448765acceb432262
+
       A_clkout,
       A_cs_n,
       A_oe_n,
@@ -190,12 +182,6 @@ input [3:0]      B_we_n;
 input            B_rd_wr;
 inout [31:0]     B_ebi_data;  // connect to D31~D0
 input [23:0]     B_ebi_addr;  // connect to A31~A8 */
-<<<<<<< HEAD
-
-=======
->>>>>>> 367bcb4e80096f9d399f969448765acceb432262
-
-
 
 wire io_a;
 wire io_b;
@@ -288,13 +274,7 @@ share_memory share_memory(
                     .B_write_data(B_write_data),
                     .B_re(B_re_o),
                     .B_we(B_we_o)
-<<<<<<< HEAD
-                   );        
-=======
-                   );              
->>>>>>> 367bcb4e80096f9d399f969448765acceb432262
-
-                   
+						  );                   
 
 ////////switch io //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////

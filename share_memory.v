@@ -70,23 +70,11 @@ reg [31:0] switch_board_info=32'hab; //ÇÐ»»°åÐÅÏ¢¿Õ¼ä£¬CPU A B Ö»ÄÜ¶Ô¸Ã¿Õ¼ä½øÐÐ¶
 
 always@(posedge A_clk)
 begin
-<<<<<<< HEAD
-=======
- //if(A_addr>= `SWITCH_BOARD_MEM)
- //  A_read_data <= switch_board_info;
- // else
->>>>>>> 367bcb4e80096f9d399f969448765acceb432262
    A_read_data <=A_out_data;
 end
 
 always@(posedge B_clk)
 begin
-<<<<<<< HEAD
-=======
-// if(B_addr>= `SWITCH_BOARD_MEM)
-//   B_read_data <= switch_board_info;
-// else
->>>>>>> 367bcb4e80096f9d399f969448765acceb432262
  B_read_data <= B_out_data;
 end
 

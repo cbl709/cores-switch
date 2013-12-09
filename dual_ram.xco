@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version K.31
-# Date: Mon Nov 18 07:02:38 2013
+# Date: Mon Nov 18 07:05:49 2013
 #
 ##############################################################
 #
@@ -27,7 +27,7 @@ SET implementationfiletype = Ngc
 SET package = fg456
 SET removerpms = False
 SET simulationfiles = Behavioral
-SET speedgrade = -5
+SET speedgrade = -4
 SET verilogsim = True
 SET vhdlsim = True
 # END Project Options
@@ -71,5 +71,5 @@ CSET write_mode_port_a=Read_After_Write
 CSET write_mode_port_b=Read_After_Write
 # END Parameters
 GENERATE
-# CRC: 9900429e
+# CRC: 1337c4c8
 

@@ -26,17 +26,23 @@ NET  sw2    LOC =   P17;
 NET  sw3    LOC =   N17;    
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 NET  power_on_A  LOC = AA6;
 NET  power_on_B  LOC = C5;
 
 NET  reset_A_pin_n LOC = W21;
 NET  reset_B_pin_n LOC = B15;
 =======
+=======
+>>>>>>> 367bcb4e80096f9d399f969448765acceb432262
 #NET  power_on_A  LOC = AA6;
 #NET  power_on_B  LOC = C5;
 
 #NET  reset_A_pin_n LOC = W21;
 #NET  reset_B_pin_n LOC = B15;
+<<<<<<< HEAD
+>>>>>>> 367bcb4e80096f9d399f969448765acceb432262
+=======
 >>>>>>> 367bcb4e80096f9d399f969448765acceb432262
 
 ############input switch #################
