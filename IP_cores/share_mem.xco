@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version K.31
-# Date: Thu Nov 14 07:33:05 2013
+# Date: Mon Nov 18 07:01:28 2013
 #
 ##############################################################
 #
@@ -41,7 +41,7 @@ CSET configuration_port_b=Read_And_Write
 CSET depth_a=1024
 CSET depth_b=1024
 CSET disable_warning_messages=true
-CSET global_init_value=0
+CSET global_init_value=ff
 CSET load_init_file=false
 CSET port_a_active_clock_edge=Rising_Edge_Triggered
 CSET port_a_additional_output_pipe_stages=0
@@ -71,5 +71,5 @@ CSET write_mode_port_a=Read_After_Write
 CSET write_mode_port_b=Read_After_Write
 # END Parameters
 GENERATE
-# CRC: 86237b0d
+# CRC: f08db23e
 

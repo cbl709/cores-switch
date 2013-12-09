@@ -46,22 +46,9 @@ wire  [21:0] addr;
 wire re;
 wire we;
 
-assign we =  ~rd_wr & ~cs_n&(we_n!=4'b1111); // 
-assign re = rd_wr & ~cs_n&(we_n==4'b1111)  ; //
+assign we = ~rd_wr & ~cs_n&(we_n!=4'b1111)&addr[13]; // 
+assign re = rd_wr & ~cs_n&(we_n==4'b1111)&addr[13]; //
 
-reg re_d1;
-reg re_d2;
-reg we_d1;
-reg we_d2;
-
-////通过2个D触发器进行同步操作
-always@ (posedge clk)
-begin
-  re_d1 <= re;
-  re_d2 <= re_d1;
-  we_d1 <= we;
-  we_d2 <= we_d1;
-end
 
 wire re_o;
 wire we_o;

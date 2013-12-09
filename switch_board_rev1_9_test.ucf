@@ -5,8 +5,8 @@ NET clk     LOC = A11  ;   # 24mhz
 
 NET srx_c   LOC =   AB6; #通讯链路A 接收端
 NET srx_d   LOC =   AB7; #       B 接收端
-NET pwm_a   LOC =   P18; # cpu a emios1
-NET pwm_b   LOC =   N18; # cpu b emios1
+#NET pwm_a   LOC =   P18; # cpu a emios1
+#NET pwm_b   LOC =   N18; # cpu b emios1
 
 #net rec_cmdA loc= k5;
 #net rec_cmdB loc= P6;
@@ -25,11 +25,19 @@ NET  sw1    LOC =   M18;
 NET  sw2    LOC =   P17;
 NET  sw3    LOC =   N17;    
 
+<<<<<<< HEAD
 NET  power_on_A  LOC = AA6;
 NET  power_on_B  LOC = C5;
 
+NET  reset_A_pin_n LOC = W21;
+NET  reset_B_pin_n LOC = B15;
+=======
+#NET  power_on_A  LOC = AA6;
+#NET  power_on_B  LOC = C5;
+
 #NET  reset_A_pin_n LOC = W21;
 #NET  reset_B_pin_n LOC = B15;
+>>>>>>> 367bcb4e80096f9d399f969448765acceb432262
 
 ############input switch #################
 net input_switch0<0> loc= G22; #rs422A+
@@ -198,141 +206,6 @@ net  output2_from_B<6> loc= K4;#B_FPGA_IO16
 net  output2_from_B<7> loc= L5;#B_FPGA_IO17
 
 ######################################################
-NET A_we_n<0>  LOC=V15;
-NET A_we_n<1>  LOC=Y15;
-NET A_we_n<2>  LOC=W11;
-NET A_we_n<3>  LOC=Y16;
 
-NET A_clkout   LOC=W12;
-
-NET A_cs_n     LOC=AA16; #cs2
-NET A_oe_n     LOC=AA17;  #OE
-NET A_rd_wr    LOC=AB15;  #RD_WR
-
-NET A_ebi_addr<2> LOC=AA13; #A29
-NET A_ebi_addr<3> LOC=Y11; #A28
-NET A_ebi_addr<4> LOC=Y10; #A27
-NET A_ebi_addr<5> LOC=V10; #A26
-NET A_ebi_addr<6> LOC=U11;  #A25
-NET A_ebi_addr<7> LOC=AB13;  #A24
-NET A_ebi_addr<8> LOC=U12;  #A23
-NET A_ebi_addr<9> LOC=V11;  #A22
-NET A_ebi_addr<10> LOC=Y13; #A21
-NET A_ebi_addr<11> LOC=AB14; #A20
-NET A_ebi_addr<12> LOC=V13; #A19
-NET A_ebi_addr<13> LOC=W14; #A18
-NET A_ebi_addr<14> LOC=Y14; #A17
-NET A_ebi_addr<15> LOC=AA15; #A16
-NET A_ebi_addr<16> LOC=V16; #A15
-NET A_ebi_addr<17> LOC=V14; #A14
-NET A_ebi_addr<18> LOC=AB16; #A13
-NET A_ebi_addr<19> LOC=V12; #A12
-NET A_ebi_addr<20> LOC=Y12; #A11
-NET A_ebi_addr<21> LOC=W13; #A10
-NET A_ebi_addr<22> LOC=U13; #A09
-NET A_ebi_addr<23> LOC=AA14; #A08
-
-
-NET A_ebi_data<0> LOC=W6 ;  #D31
-NET A_ebi_data<1> LOC=AB8;  #D30
-NET A_ebi_data<2> LOC=V5 ;  #D29
-NET A_ebi_data<3> LOC=AA18;  #D28
-NET A_ebi_data<4> LOC=V3 ;  #D27
-NET A_ebi_data<5> LOC=AA9;  #D26
-NET A_ebi_data<6> LOC=AB12;  #D25
-NET A_ebi_data<7> LOC=U14;  #D24
-NET A_ebi_data<8> LOC=AB10;  #D23
-NET A_ebi_data<9> LOC=T5 ;  #D22
-NET A_ebi_data<10> LOC=AB9;  #D21
-NET A_ebi_data<11> LOC=AA10;  #D20
-NET A_ebi_data<12> LOC=Y6 ;  #D19
-NET A_ebi_data<13> LOC=AA5;  #D18
-NET A_ebi_data<14> LOC=V4 ;  #D17
-NET A_ebi_data<15> LOC=U4 ;  #D16
-NET A_ebi_data<16> LOC=U9;  #D15
-NET A_ebi_data<17> LOC=V8;  #D14
-NET A_ebi_data<18> LOC=Y8;  #D13
-NET A_ebi_data<19> LOC=AA11; #D12
-NET A_ebi_data<20> LOC=Y7;  #D11
-NET A_ebi_data<21> LOC=W7;  #D10
-NET A_ebi_data<22> LOC=V6;  #D 9
-NET A_ebi_data<23> LOC=U5;  #D 8
-NET A_ebi_data<24> LOC=W10;  #D 7
-NET A_ebi_data<25> LOC=U10;  #D 6
-NET A_ebi_data<26> LOC=V9;  #D 5
-NET A_ebi_data<27> LOC=Y9;  #D 4
-NET A_ebi_data<28> LOC=AA12; #D 3
-NET A_ebi_data<29> LOC=W8;  #D 2
-NET A_ebi_data<30> LOC=W9;  #D 1
-NET A_ebi_data<31> LOC=V7;  #D 0
-
-
-#####################################
-NET B_we_n<0>  LOC=F19;
-NET B_we_n<1>  LOC=D16;
-NET B_we_n<2>  LOC=F13;
-NET B_we_n<3>  LOC=A13;
-
-NET B_clkout   LOC=E12;
-NET B_cs_n     LOC=C17 ; #cs2
-NET B_oe_n     LOC=D17 ;  #OE
-NET B_rd_wr    LOC=D18 ;  #RD_WR
-
-NET B_ebi_addr<2> LOC=E14; #A29
-NET B_ebi_addr<3> LOC=D12; #A28
-NET B_ebi_addr<4> LOC=C13; #A27
-NET B_ebi_addr<5> LOC=F11; #A26
-NET B_ebi_addr<6> LOC=A9 ;  #A25
-NET B_ebi_addr<7> LOC=E15;  #A24
-NET B_ebi_addr<8> LOC=B9 ;  #A23
-NET B_ebi_addr<9> LOC=F12;  #A22
-NET B_ebi_addr<10> LOC=D14; #A21
-NET B_ebi_addr<11> LOC=E17;  #A20
-NET B_ebi_addr<12> LOC=F14; #A19
-NET B_ebi_addr<13> LOC=C16; #A18
-NET B_ebi_addr<14> LOC=D15; #A17
-NET B_ebi_addr<15> LOC=E18;  #A16
-NET B_ebi_addr<16> LOC=B12; #A15
-NET B_ebi_addr<17> LOC=F18; #A14
-NET B_ebi_addr<18> LOC=E20;  #A13
-NET B_ebi_addr<19> LOC=C14; #A12
-NET B_ebi_addr<20> LOC=D13; #A11
-NET B_ebi_addr<21> LOC=C15; #A10
-NET B_ebi_addr<22> LOC=A10; #A09
-NET B_ebi_addr<23> LOC=E16; #A08
-
-
-NET B_ebi_data<0> LOC=C8 ;  #D31
-NET B_ebi_data<1> LOC=C7 ;  #D30
-NET B_ebi_data<2> LOC=E5 ;  #D29
-NET B_ebi_data<3> LOC=F20;   #D28
-NET B_ebi_data<4> LOC=E4 ;  #D27
-NET B_ebi_data<5> LOC=D11;  #D26
-NET B_ebi_data<6> LOC=E13;   #D25
-NET B_ebi_data<7> LOC=B10;  #D24
-NET B_ebi_data<8> LOC=E9;    #D23
-NET B_ebi_data<9> LOC=B7;  #D22
-NET B_ebi_data<10> LOC=D6 ;  #D21
-NET B_ebi_data<11> LOC=E8;    #D20
-NET B_ebi_data<12> LOC=D7 ;  #D19
-NET B_ebi_data<13> LOC=C6 ;  #D18
-NET B_ebi_data<14> LOC=B6 ;  #D17
-NET B_ebi_data<15> LOC=A6 ;  #D16
-NET B_ebi_data<16> LOC=A8;  #D15
-NET B_ebi_data<17> LOC=F9;  #D14
-NET B_ebi_data<18> LOC=D9;  #D13
-NET B_ebi_data<19> LOC=E10;  #D12
-NET B_ebi_data<20> LOC=D8;  #D11
-NET B_ebi_data<21> LOC=C9;  #D10
-NET B_ebi_data<22> LOC=E6;  #D 9
-NET B_ebi_data<23> LOC=A7;  #D 8
-NET B_ebi_data<24> LOC=C12;  #D 7
-NET B_ebi_data<25> LOC=B8;   #D 6
-NET B_ebi_data<26> LOC=F10;  #D 5
-NET B_ebi_data<27> LOC=D10;  #D 4
-NET B_ebi_data<28> LOC=E11;  #D 3
-NET B_ebi_data<29> LOC=C10;  #D 2
-NET B_ebi_data<30> LOC=C11;  #D 1
-NET B_ebi_data<31> LOC=E7;  #D 0
 
 

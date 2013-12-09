@@ -23,7 +23,6 @@ module command(      clk,
                      rdr,
                      rf_counter,
                      switch,        // working status, switch==0 CPU A is the host else CPU B is the host
-                     status,
                      command_time_out_d,
                      rf_pop,
                      tf_push,
@@ -49,7 +48,6 @@ output rf_pop;
 output tf_push;
 output error;
 output com_swi;         //保存指令切换数据==0说明上次指令为切换到A机，否则是切换到B机
-output [3:0] status;
 output [7:0] tdr;
 output reset_A;        //高电平复位CPU A
 output reset_B;        //高电平复位CPU B
@@ -67,8 +65,8 @@ reg [7:0] adder  = 8'h00;
 reg com_swi      = 1'b0;
 reg error        = 1'b0;
 reg [7:0] cmd_fifo [7:0]; // fifo store 1 command frame(8 bytes)
-reg reset_a      =1'b0;
-reg reset_b      =1'b0;
+reg reset_a_flag      =1'b0; //复位标志
+reg reset_b_flag      =1'b0;
 reg power_on_A   =1'b1;
 reg power_on_B   =1'b1; 
 reg force_swi    =1'b0;
@@ -122,7 +120,7 @@ begin
           wr_en   <=0;
           cycle   <=cycle+1;
        end
-   1: begin   //这个??时是必须的
+   1: begin   //这个??时是必??的
         cycle <= cycle+1;
       end
      
@@ -169,8 +167,8 @@ begin
         rd_en         <=0;
         force_swi     <=0;
         adder         <=0;
-        reset_a       <=0;
-        reset_b       <=0;
+        reset_a_flag       <=0;
+        reset_b_flag       <=0;
         byte_count    <=0;
         force_swi     <= 0;
         rst           <=0;
@@ -232,7 +230,7 @@ check_start2:  begin
 store_frame:  begin 
               if(byte_count==4'd8) begin     //store frame finish 8 bytes
                 next_status<=check_frame;
-                adder              <= cmd_fifo[2]+cmd_fifo[3]+cmd_fifo[4]+cmd_fifo[5];
+                adder      <= cmd_fifo[2]+cmd_fifo[3]+cmd_fifo[4]+cmd_fifo[5];
                 end
               else begin 
               cmd_fifo[byte_count] <= dout;
@@ -261,7 +259,7 @@ check_frame:
                         8'ha0: begin
                             if(switch)                  // CPU A is not working
                                 begin
-                                reset_a <=1;            // reset CPU A
+                                reset_a_flag <=1;            // reset CPU A
                                 com_swi <=1;            // set CPU B to be the host CPU
                                 end
                                                         // CPU A is working, ignore this command
@@ -269,20 +267,20 @@ check_frame:
                         8'hb0: begin
                                 if(~switch) // CPU B is not working
                                 begin
-                                reset_b <=1; // reset CPU B
+                                reset_b_flag <=1; // reset CPU B
                                 com_swi <=0; // set CPU A to be the host CPU
                                 end
                                              // CPU B is working, ignore this command
                                 end
                         8'hab: begin
-                                    reset_a   <= 1;
-                                    reset_b   <= 1;
+                                    reset_a_flag   <= 1;
+                                    reset_b_flag   <= 1;
                                     com_swi   <= 0;
                                     force_swi <= 1;
                                 end
                         8'hba: begin
-                                    reset_a   <= 1;
-                                    reset_b   <= 1;
+                                    reset_a_flag   <= 1;
+                                    reset_b_flag   <= 1;
                                     com_swi   <= 1;
                                     force_swi <= 1;
                                 end
@@ -290,7 +288,7 @@ check_frame:
                                     if(switch) begin  // CPU A is not working 
                                     power_on_A <=1;
                                     com_swi    <=0;
-												force_swi  <=1;
+                                    force_swi  <=1;
                                     end
                                  end
                         8'h55: begin
@@ -306,12 +304,12 @@ check_frame:
                         8'h44: begin
                                    // if(~switch)      //CPU B is not host CPU
                                     power_on_B <= 0; // turn off CPU B
-												
+                                                
                                 end
                       default: begin
                             com_swi <=0;
-                            reset_a <=0;
-                            reset_b <=0;
+                            reset_a_flag <=0;
+                            reset_b_flag <=0;
                             power_on_A <=1;
                             power_on_B <=1;
                                end
@@ -352,13 +350,13 @@ assign reset_B=reset_b_signal;
 
 always @(posedge clk )
 begin
-      if(reset_a) begin
+      if(reset_a_flag) begin
         reset_a_signal <= 1;
         cnt_a_en       <= 1;
         cnt_a_rst      <= 0;
         end
         
-      if(reset_b) begin
+      if(reset_b_flag) begin
         reset_b_signal <= 1;
         cnt_b_en       <= 1;
         cnt_b_rst      <= 0;

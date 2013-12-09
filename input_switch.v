@@ -25,11 +25,11 @@ begin
   if(!ctr_io)
     begin
     input_to_A  <= input_pin;
-    input_to_B  <= 8'hzz;
+    input_to_B  <= 8'hff;
     end
   else begin
     input_to_B  <= input_pin;
-    input_to_A  <= 8'hzz;
+    input_to_A  <= 8'hff;
   end
    
 end

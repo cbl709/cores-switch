@@ -14,25 +14,23 @@ module output_switch(
 input clk;
 input ctr_io;
 output  [7:0] output_pin;
+reg     [7:0] output_pin;
 input   [7:0] output_from_A;
-reg     [7:0] A_reg;
 input   [7:0] output_from_B;
-reg     [7:0] B_reg;
 
 //reg [7:0] output_pin=8'hff;
 
-assign output_pin= ~ctr_io? output_from_A: output_from_B;
-/*always@ (posedge clk)
+//assign output_pin= ~ctr_io? output_from_A: output_from_B;
+always@ (posedge clk)
 begin
-  A_reg <=output_from_A;
-  B_reg <=output_from_B;
+ 
   if(!ctr_io)
-    output_pin  <= A_reg;
+    output_pin  <= output_from_A;
   else 
-    output_pin  <= B_reg;
+    output_pin  <= output_from_B;
     
    
-end*/
+end
 
 
 endmodule 

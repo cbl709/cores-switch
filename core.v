@@ -42,7 +42,6 @@ module core(
             );
             
 parameter DL= (`OSC*1000)/(16*`BAUD);
-
 input clk;
 input rst_n;   
 input io_a;
@@ -144,7 +143,7 @@ begin
 end
 
 /////////////switch decision/////////////////////////////////////////////////////////
-always@ ( a_error or b_error or com_swi or force_swi )
+always@ (a_error or b_error or com_swi or a_err_num or b_err_num)
 begin
     
     case({a_error, b_error, com_swi})
@@ -283,7 +282,7 @@ wire [7:0]                      commA_rdr;
 wire [7:0]                      commB_rdr;
 reg                            commA_rf_pop =1'b0;
 reg                            commB_rf_pop =1'b0;
-always@(comm_sel)
+always@(comm_sel or commA_rdr or commA_rf_count or commB_rdr or commB_rf_count)
 begin
   case (comm_sel)
      1'b0:          // use communication port A
