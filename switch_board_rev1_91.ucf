@@ -1,0 +1,283 @@
+
+### cores switch board rev1.91
+
+NET clk     LOC = AA12  ;   # 24mhz
+
+NET srx_c   LOC =   T21; #通讯链路A 接收端
+NET srx_d   LOC =   T22; #       B 接收端
+NET pwm_a   LOC =   V21; # cpu a emios20
+NET pwm_b   LOC =   D22; # cpu b emios20
+
+NET led1    LOC =   E12;
+NET led2    LOC =   E11;
+NET led3    LOC =   E10;
+NET led4    LOC =   E9;
+NET led5    LOC =   E8;
+#NET led6    LOC =  E7;
+
+#NET GPIO_A  LOC =   AB15; # CPU A GPIO205
+#NET GPIO_B  LOC =   B14;
+
+NET  sw0    LOC =   U11;
+NET  sw1    LOC =   U10;
+NET  sw2    LOC =   E21;
+    
+
+NET  power_on_A  LOC = R22;
+NET  power_on_B  LOC = E22;
+
+NET  reset_CPUA LOC = U5;
+NET  reset_CPUB LOC = V4;
+
+
+# output switch
+net output_switch0<0> loc= T4 ; # FPGA_IO20
+net output_switch0<1> loc= R4 ; # FPGA_IO21
+net output_switch0<2> loc= P4 ; # FPGA_IO22
+net output_switch0<3> loc= N4 ; # FPGA_IO23
+net output_switch0<4> loc= M4 ; # FPGA_IO24
+net output_switch0<5> loc= L4 ; # FPGA_IO25
+net output_switch0<6> loc= K4 ; # FPGA_IO26
+net output_switch0<7> loc= J4 ; # FPGA_IO27
+
+net output_switch1<0> loc=H4;   #FPGA_IO28
+net output_switch1<1> loc=G4;   #FPGA_IO29
+net output_switch1<2> loc=F4;   #FPGA_IO30
+net output_switch1<3> loc=E4;   #FPGA_IO31
+net output_switch1<4> loc=K6;   #FPGA_IO32
+net output_switch1<5> loc=L3;   #FPGA_IO33
+net output_switch1<6> loc=K3;   #FPGA_IO34
+net output_switch1<7> loc=J3;   #FPGA_IO35
+
+net output_switch2<0> loc=H3;   #FPGA_IO36
+net output_switch2<1> loc=F3;   #FPGA_IO37
+net output_switch2<2> loc=G3;   #FPGA_IO38
+net output_switch2<3> loc=E3;   #FPGA_IO39
+net output_switch2<4> loc=E5;   #EMIOS1
+net output_switch2<5> loc=G5;   #EMIOS23
+net output_switch2<6> loc=F5;   #ETPUA4
+net output_switch2<7> loc=M6;   #ETPUA22
+
+net output_switch3<0> loc=P6;   #ETPUA24
+net output_switch3<1> loc=U9;   #ETPUA27
+net output_switch3<2> loc=AA3;   #ETPUA28
+net output_switch3<3> loc=R5;   #ETPUA31
+net output_switch3<4> loc=H5;   #ETPUB18
+net output_switch3<5> loc=K5;   #ETPUB20
+net output_switch3<6> loc=J5;   #ETPUB21
+net output_switch3<7> loc=M5;   #ETPUB24
+
+
+
+net  output0_from_A<0> loc= V1;#A_FPGA_IO20
+net  output0_from_A<1> loc= N1;#A_FPGA_IO21
+net  output0_from_A<2> loc= M2;#A_FPGA_IO22
+net  output0_from_A<3> loc= V2;#A_FPGA_IO23
+net  output0_from_A<4> loc= W1;#A_FPGA_IO24
+net  output0_from_A<5> loc= M1;#A_FPGA_IO25
+net  output0_from_A<6> loc= W2;#A_FPGA_IO26
+net  output0_from_A<7> loc= M3;#A_FPGA_IO27
+
+net  output1_from_A<0> loc= N3;#A_FPGA_IO28
+net  output1_from_A<1> loc= R3;#A_FPGA_IO29
+net  output1_from_A<2> loc= P3;#A_FPGA_IO30
+net  output1_from_A<3> loc= N2;#A_FPGA_IO31
+net  output1_from_A<4> loc= T3;#A_FPGA_IO32
+net  output1_from_A<5> loc= P2;#A_FPGA_IO33
+net  output1_from_A<6> loc= P1;#A_FPGA_IO34
+net  output1_from_A<7> loc= R2;#A_FPGA_IO35 
+
+net  output2_from_A<0> loc= R1;#A_FPGA_IO36
+net  output2_from_A<1> loc= T2;#A_FPGA_IO37
+net  output2_from_A<2> loc= T1;#A_FPGA_IO38
+net  output2_from_A<3> loc= U1;#A_FPGA_IO39
+net  output2_from_A<4> loc= U21;#A_EMIOS1
+net  output2_from_A<5> loc= V22;#A_EMIOS23
+net  output2_from_A<6> loc= U22;#A_ETPUA4
+net  output2_from_A<7> loc= AA14;#A_ETPUA22
+
+net  output3_from_A<0> loc= AB14;#A_ETPUA24
+net  output3_from_A<1> loc= AA13;#A_ETPUA27
+net  output3_from_A<2> loc= AB13;#A_ETPUA28
+net  output3_from_A<3> loc= W21;#A_ETPUB18
+net  output3_from_A<4> loc= Y21;#A_ETPUB20
+net  output3_from_A<5> loc= W22;#A_ETPUB21
+net  output3_from_A<6> loc= AB17;#A_ETPUB24
+net  output3_from_A<7> loc= Y22;#A_ETPUB25
+
+net  output0_from_B<0> loc= J2;#B_FPGA_IO20
+net  output0_from_B<1> loc= B5;#B_FPGA_IO21
+net  output0_from_B<2> loc= A5;#B_FPGA_IO22
+net  output0_from_B<3> loc= K1;#B_FPGA_IO23
+net  output0_from_B<4> loc= K2;#B_FPGA_IO24
+net  output0_from_B<5> loc= A4;#B_FPGA_IO25
+net  output0_from_B<6> loc= L2;#B_FPGA_IO26
+net  output0_from_B<7> loc= J1;#B_FPGA_IO27
+
+net  output1_from_B<0> loc= H2;#B_FPGA_IO28
+net  output1_from_B<1> loc= G2;#B_FPGA_IO29
+net  output1_from_B<2> loc= H1;#B_FPGA_IO30
+net  output1_from_B<3> loc= F2;#B_FPGA_IO31
+net  output1_from_B<4> loc= G1;#B_FPGA_IO32
+net  output1_from_B<5> loc= E2;#B_FPGA_IO33
+net  output1_from_B<6> loc= F1;#B_FPGA_IO34
+net  output1_from_B<7> loc= D2;#B_FPGA_IO35 
+
+net  output2_from_B<0> loc= E1;#B_FPGA_IO36
+net  output2_from_B<1> loc= C2;#B_FPGA_IO37
+net  output2_from_B<2> loc= D1;#B_FPGA_IO38
+net  output2_from_B<3> loc= C1;#B_FPGA_IO39
+net  output2_from_B<4> loc= U19;#B_EMIOS1
+net  output2_from_B<5> loc= C21;#B_EMIOS23
+net  output2_from_B<6> loc= D21;#B_ETPUA4
+net  output2_from_B<7> loc= A14 ;#B_ETPUA22
+
+net  output3_from_B<0> loc= B13 ;#B_ETPUA24
+net  output3_from_B<1> loc= A13 ;#B_ETPUA27
+net  output3_from_B<2> loc= B12 ;#B_ETPUA28
+net  output3_from_B<3> loc= C22;#B_ETPUB18
+net  output3_from_B<4> loc= B17;#B_ETPUB20
+net  output3_from_B<5> loc= A19;#B_ETPUB21
+net  output3_from_B<6> loc= B16;#B_ETPUB24
+net  output3_from_B<7> loc= A17;#B_ETPUB25
+
+
+######################################################
+NET A_we_n<0>  LOC=W16;
+NET A_we_n<1>  LOC=Y15;
+NET A_we_n<2>  LOC=W13;
+NET A_we_n<3>  LOC=V16;
+
+NET A_clkout   LOC=AB12;
+
+NET A_cs_n     LOC=Y16; #cs2
+NET A_oe_n     LOC=Y17;  #OE
+NET A_rd_wr    LOC=AB10;  #RD_WR
+
+NET A_ebi_addr<2> LOC=AA7; #A29
+NET A_ebi_addr<3> LOC=Y11; #A28
+NET A_ebi_addr<4> LOC=AB19; #A27
+NET A_ebi_addr<5> LOC=W11; #A26
+NET A_ebi_addr<6> LOC=V11;  #A25
+NET A_ebi_addr<7> LOC=AB8;  #A24
+NET A_ebi_addr<8> LOC=V12;  #A23
+NET A_ebi_addr<9> LOC=W12;  #A22
+NET A_ebi_addr<10> LOC=Y13; #A21
+NET A_ebi_addr<11> LOC=AB9 ; #A20
+NET A_ebi_addr<12> LOC=W14; #A19
+NET A_ebi_addr<13> LOC=Y18; #A18
+NET A_ebi_addr<14> LOC=Y14; #A17
+NET A_ebi_addr<15> LOC=AA9 ; #A16
+NET A_ebi_addr<16> LOC=V15; #A15
+NET A_ebi_addr<17> LOC=W15; #A14
+NET A_ebi_addr<18> LOC=AA10; #A13
+NET A_ebi_addr<19> LOC=AB18;#A12
+NET A_ebi_addr<20> LOC=Y12; #A11
+NET A_ebi_addr<21> LOC=AA18; #A10
+NET A_ebi_addr<22> LOC=V13; #A09
+NET A_ebi_addr<23> LOC=AA8 ; #A08
+
+
+NET A_ebi_data<0> LOC=Y1 ;  #D31
+NET A_ebi_data<1> LOC=Y2 ;  #D30
+NET A_ebi_data<2> LOC=W6 ;  #D29
+NET A_ebi_data<3> LOC=AA11;  #D28
+NET A_ebi_data<4> LOC=W5 ;  #D27
+NET A_ebi_data<5> LOC=Y10;  #D26
+NET A_ebi_data<6> LOC=AB7 ;  #D25
+NET A_ebi_data<7> LOC=V14;  #D24
+NET A_ebi_data<8> LOC=AA5 ;  #D23
+NET A_ebi_data<9> LOC=V8 ;  #D22
+NET A_ebi_data<10> LOC=AA4;  #D21
+NET A_ebi_data<11> LOC=AB5 ;  #D20
+NET A_ebi_data<12> LOC=Y6 ;  #D19
+NET A_ebi_data<13> LOC=AB4;  #D18
+NET A_ebi_data<14> LOC=V6 ;  #D17
+NET A_ebi_data<15> LOC=V5 ;  #D16
+NET A_ebi_data<16> LOC=V9;  #D15
+NET A_ebi_data<17> LOC=W9;  #D14
+NET A_ebi_data<18> LOC=Y8;  #D13
+NET A_ebi_data<19> LOC=AB6 ; #D12
+NET A_ebi_data<20> LOC=Y7;  #D11
+NET A_ebi_data<21> LOC=V3;  #D10
+NET A_ebi_data<22> LOC=W7;  #D 9
+NET A_ebi_data<23> LOC=V7;  #D 8
+NET A_ebi_data<24> LOC=Y5 ;  #D 7
+NET A_ebi_data<25> LOC=V10;  #D 6
+NET A_ebi_data<26> LOC=W10; #D 5
+NET A_ebi_data<27> LOC=Y9;  #D 4
+NET A_ebi_data<28> LOC=AA6 ; #D 3
+NET A_ebi_data<29> LOC=U3;  #D 2
+NET A_ebi_data<30> LOC=U4;  #D 1
+NET A_ebi_data<31> LOC=W8;  #D 0
+
+
+#####################################
+NET B_we_n<0>  LOC=M19;
+NET B_we_n<1>  LOC=R20;
+NET B_we_n<2>  LOC=R19;
+NET B_we_n<3>  LOC=K19;
+
+NET B_clkout   LOC=A11;
+NET B_cs_n     LOC=D17 ; #cs2
+NET B_oe_n     LOC=B11 ;  #OE
+NET B_rd_wr    LOC=B10 ;  #RD_WR
+
+NET B_ebi_addr<2> LOC=A7 ; #A29
+NET B_ebi_addr<3> LOC=L20; #A28
+NET B_ebi_addr<4> LOC=D13; #A27
+NET B_ebi_addr<5> LOC=E6 ; #A26
+NET B_ebi_addr<6> LOC=E19;  #A25
+NET B_ebi_addr<7> LOC=B8 ;  #A24
+NET B_ebi_addr<8> LOC=F19;  #A23
+NET B_ebi_addr<9> LOC=T19;  #A22
+NET B_ebi_addr<10> LOC=N20; #A21
+NET B_ebi_addr<11> LOC=B9 ;  #A20
+NET B_ebi_addr<12> LOC=P19; #A19
+NET B_ebi_addr<13> LOC=D16; #A18
+NET B_ebi_addr<14> LOC=P20; #A17
+NET B_ebi_addr<15> LOC=A9 ;  #A16
+NET B_ebi_addr<16> LOC=J19; #A15
+NET B_ebi_addr<17> LOC=N19; #A14
+NET B_ebi_addr<18> LOC=A10;  #A13
+NET B_ebi_addr<19> LOC=D14; #A12
+NET B_ebi_addr<20> LOC=M20; #A11
+NET B_ebi_addr<21> LOC=D15; #A10
+NET B_ebi_addr<22> LOC=G19; #A09
+NET B_ebi_addr<23> LOC=A8 ; #A08
+
+
+NET B_ebi_data<0> LOC=D8 ;  #D31
+NET B_ebi_data<1> LOC=D7 ;  #D30
+NET B_ebi_data<2> LOC=C12;  #D29
+NET B_ebi_data<3> LOC=L19;   #D28
+NET B_ebi_data<4> LOC=C11;  #D27
+NET B_ebi_data<5> LOC=K20;  #D26
+NET B_ebi_data<6> LOC=B7 ;   #D25
+NET B_ebi_data<7> LOC=H19;  #D24
+NET B_ebi_data<8> LOC=G20;    #D23
+NET B_ebi_data<9> LOC=C16;  #D22
+NET B_ebi_data<10> LOC=E20;  #D21
+NET B_ebi_data<11> LOC=F20 ;   #D20
+NET B_ebi_data<12> LOC=C6 ;  #D19
+NET B_ebi_data<13> LOC=C7 ;  #D18
+NET B_ebi_data<14> LOC=C14;  #D17
+NET B_ebi_data<15> LOC=C13;  #D16
+NET B_ebi_data<16> LOC=C17;  #D15
+NET B_ebi_data<17> LOC=C8;  #D14
+NET B_ebi_data<18> LOC=H20;  #D13
+NET B_ebi_data<19> LOC=B6 ;  #D12
+NET B_ebi_data<20> LOC=C5;  #D11
+NET B_ebi_data<21> LOC=D9;  #D10
+NET B_ebi_data<22> LOC=C10;  #D 9
+NET B_ebi_data<23> LOC=C15; #D 8
+NET B_ebi_data<24> LOC=D12;  #D 7
+NET B_ebi_data<25> LOC=C18;   #D 6
+NET B_ebi_data<26> LOC=D6 ;  #D 5
+NET B_ebi_data<27> LOC=J20;  #D 4
+NET B_ebi_data<28> LOC=A6 ;  #D 3
+NET B_ebi_data<29> LOC=D10;  #D 2
+NET B_ebi_data<30> LOC=D11;  #D 1
+NET B_ebi_data<31> LOC=C9;  #D 0
+
+

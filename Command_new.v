@@ -284,25 +284,21 @@ check_frame:
                                     com_swi   <= 1;
                                     force_swi <= 1;
                                 end
-                        8'haa: begin                  //power on A, and set CPU A be host CPU
-                                    if(switch) begin  // CPU A is not working 
+                        8'haa: begin             //power on A
+                          
                                     power_on_A <=1;
-                                    com_swi    <=0;
-                                    force_swi  <=1;
-                                    end
-                                 end
+                                    
+                               end
                         8'h55: begin
-                                  // if(switch)        //CPU A is not host CPU
+                                   if(switch)        //CPU A is not host CPU
                                     power_on_A <= 0; // turn off CPU A
                                 end
                         8'hbb: begin
-                                    if(~switch) begin //power on B, and set CPU B be host CPU
-                                    power_on_B <=1;
-                                    com_swi    <= 1;
-                                    end
+                                    //power on B
+                                    power_on_B <=1;                           
                                 end
                         8'h44: begin
-                                   // if(~switch)      //CPU B is not host CPU
+                                    if(~switch)      //CPU B is not host CPU
                                     power_on_B <= 0; // turn off CPU B
                                                 
                                 end

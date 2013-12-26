@@ -45,7 +45,7 @@ module top(
       led5,
      // led6, //test led
       
-      input_switch0,
+     /* input_switch0,
       input_switch1,
       input_switch2,
       input0_to_A,
@@ -53,26 +53,28 @@ module top(
       input2_to_A,
       input0_to_B,
       input1_to_B,
-      input2_to_B,
+      input2_to_B,*/
       
       output_switch0,
       output_switch1,
       output_switch2,
+		output_switch3,
       output0_from_A,
       output1_from_A,
       output2_from_A,
+	   output3_from_A,
       output0_from_B,
       output1_from_B,
       output2_from_B,
+		output3_from_B,
 
       
       sw0,
       sw1,
-      sw2,
-      sw3,
+      sw2,   
       
-     reset_A_pin_n, // 低电平复位计算机A
-     reset_B_pin_n, // 低电平复位计算机B
+	  reset_CPUA, // 高电平复位计算机A
+     reset_CPUB, // 高电平复位计算机B
       
      power_on_A,
      power_on_B,
@@ -130,17 +132,17 @@ output GPIO_B;
 output sw0;
 output sw1;
 output sw2;
-output sw3;
+//output sw3;
 
-output  reset_A_pin_n; // 低电平复位计算?鶤
-output  reset_B_pin_n; // 低电平复位计算机B
+output  reset_CPUA; //
+output  reset_CPUB; // 
 
 output  power_on_A;
 output  power_on_B;
 
 
 //////////swi io pin////
-input [7:0]       input_switch0;
+/*input [7:0]       input_switch0;
 output [7:0]      input0_to_A;
 output [7:0]      input0_to_B;
 input [7:0]       input_switch1;
@@ -150,19 +152,24 @@ output [7:0]      input1_to_A;
 output [7:0]      input2_to_A;
 
 output [7:0]      input1_to_B;
-output [7:0]      input2_to_B;
+output [7:0]      input2_to_B;*/
       
+
+
 output [7:0]      output_switch0;
-input [7:0]       output0_from_A;
-input [7:0]       output0_from_B;
 output [7:0]      output_switch1;
 output [7:0]      output_switch2;
+output [7:0]      output_switch3;
 
+input [7:0]      output0_from_A;
 input [7:0]      output1_from_A;
 input [7:0]      output2_from_A;
+input [7:0]      output3_from_A;
 
+input [7:0]      output0_from_B;
 input [7:0]      output1_from_B;
 input [7:0]      output2_from_B;
+input [7:0]      output3_from_B;
 
 
 ////共享内存EBI信号//////
@@ -204,11 +211,11 @@ wire command_time_out_d;
 wire power_on_A;
 wire power_on_B;
 
-assign {sw0,sw1,sw2,sw3}={switch,switch,switch,switch};
+assign {sw0,sw1,sw2}={switch,switch,switch};
 
 /////该上电复位逻辑控制硬件相关，根据具体硬件电路修改
-//assign {power_off_A,power_off_B}={~power_on_A,~power_on_B};
-assign {reset_A_pin_n,reset_B_pin_n}={~reset_A,~reset_B};
+//assign {power_on_A,power_on_B}={~power_on_A,~power_on_B};
+assign {reset_CPUA,reset_CPUB}={reset_A,reset_B};
 
 //////////////////CPU A CPU B共享内存代码//////////////////////////////
 
@@ -279,15 +286,6 @@ share_memory share_memory(
 ////////switch io //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
 
-//////////switch 0//////////////////////////
-input_switch input_swi0(
-                    .clk(clk),
-                    .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
-                    .input_pin(input_switch0),
-                    .input_to_A(input0_to_A),
-                    .input_to_B(input0_to_B)
-                    );
-
 output_switch output_swi0(
                     .clk(clk),
                     .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
@@ -295,24 +293,7 @@ output_switch output_swi0(
                     .output_from_A(output0_from_A),
                     .output_from_B(output0_from_B)
                     );
-                    
-///////////switch1 switch2///////////////
 
-
-input_switch input_swi1(
-                    .clk(clk),
-                    .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
-                    .input_pin(input_switch1),
-                    .input_to_A(input1_to_A),
-                    .input_to_B(input1_to_B)
-                    );
-input_switch input_swi2(
-                    .clk(clk),
-                    .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
-                    .input_pin(input_switch2),
-                    .input_to_A(input2_to_A),
-                    .input_to_B(input2_to_B)
-                    );
 
 output_switch output_swi1(
                     .clk(clk),
@@ -327,6 +308,13 @@ output_switch output_swi2(
                     .output_pin(output_switch2),
                     .output_from_A(output2_from_A),
                     .output_from_B(output2_from_B)
+                    );
+output_switch output_swi3(
+                    .clk(clk),
+                    .ctr_io(switch), // ctr_io==0 switch to CPU A else CPU B
+                    .output_pin(output_switch3),
+                    .output_from_A(output3_from_A),
+                    .output_from_B(output3_from_B)
                     );
 
 ///////////////////////////////////end switch io/////////////////////////////////////////////////////////                    
