@@ -16,7 +16,6 @@
 // Revision: 
 // Revision 0.01 - File Created
 // Additional Comments: 
-//
 //////////////////////////////////////////////////////////////////////////////////
 `include "uart_defines.v"
 module top(
@@ -43,41 +42,33 @@ module top(
       led3,
       led4,
       led5,
-     // led6, //test led
+      led6, //debug_mode led
       
-     /* input_switch0,
-      input_switch1,
-      input_switch2,
-      input0_to_A,
-      input1_to_A,
-      input2_to_A,
-      input0_to_B,
-      input1_to_B,
-      input2_to_B,*/
+     
       
       output_switch0,
       output_switch1,
       output_switch2,
-		output_switch3,
+      output_switch3,
       output0_from_A,
       output1_from_A,
       output2_from_A,
-	   output3_from_A,
+      output3_from_A,
       output0_from_B,
       output1_from_B,
       output2_from_B,
-		output3_from_B,
+      output3_from_B,
 
       
       sw0,
       sw1,
       sw2,   
       
-	  reset_CPUA, // 高电平复位计算机A
-     reset_CPUB, // 高电平复位计算机B
+     reset_CPUA_pad, // 高电平复位计算机A
+     reset_CPUB_pad, // 高电平复位计算机B
       
-     power_on_A,
-     power_on_B,
+     power_on_A_pad, //高电平上电计算机A
+     power_on_B_pad,
      
       
       GPIO_A,
@@ -124,7 +115,7 @@ output led2;
 output led3;
 output led4;
 output led5;
-//output led6;
+output led6;
 
 output GPIO_A;
 output GPIO_B;
@@ -134,26 +125,14 @@ output sw1;
 output sw2;
 //output sw3;
 
-output  reset_CPUA; //
-output  reset_CPUB; // 
+output  reset_CPUA_pad; //
+output  reset_CPUB_pad; // 
 
-output  power_on_A;
-output  power_on_B;
+output  power_on_A_pad; //
+output  power_on_B_pad;
 
 
 //////////swi io pin////
-/*input [7:0]       input_switch0;
-output [7:0]      input0_to_A;
-output [7:0]      input0_to_B;
-input [7:0]       input_switch1;
-input [7:0]       input_switch2;
-
-output [7:0]      input1_to_A;
-output [7:0]      input2_to_A;
-
-output [7:0]      input1_to_B;
-output [7:0]      input2_to_B;*/
-      
 
 
 output [7:0]      output_switch0;
@@ -193,11 +172,23 @@ input [23:0]     B_ebi_addr;  // connect to A31~A8 */
 wire io_a;
 wire io_b;
 wire force_swi;
-wire com_swi;
+wire cmd_swi;  //command switch data:
 wire error;
 wire reset_A;
 wire reset_B;
 wire switch;
+wire cmd_power_on_A;
+wire cmd_power_on_B;
+wire force_power_control_A;
+wire force_power_control_B;
+wire power_on_A_flag; //A机上电上电标志
+wire power_on_B_flag;
+
+wire CPUA_fail;
+wire CPUB_fail;
+
+wire debug_mode;
+            
 
 wire       com_pop;
 wire [7:0] rec_command;
@@ -214,8 +205,8 @@ wire power_on_B;
 assign {sw0,sw1,sw2}={switch,switch,switch};
 
 /////该上电复位逻辑控制硬件相关，根据具体硬件电路修改
-//assign {power_on_A,power_on_B}={~power_on_A,~power_on_B};
-assign {reset_CPUA,reset_CPUB}={reset_A,reset_B};
+assign {power_on_A_pad,power_on_B_pad}={power_on_A_flag,power_on_B_flag};
+assign {reset_CPUA_pad,reset_CPUB_pad}={reset_A,reset_B};
 
 //////////////////CPU A CPU B共享内存代码//////////////////////////////
 
@@ -280,8 +271,11 @@ share_memory share_memory(
                     .B_read_data(B_read_data),
                     .B_write_data(B_write_data),
                     .B_re(B_re_o),
-                    .B_we(B_we_o)
-						  );                   
+                    .B_we(B_we_o),
+						  
+						  .CPUA_fail(CPUA_fail),
+				        .CPUB_fail(CPUB_fail)
+                          );                   
 
 ////////switch io //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -321,20 +315,36 @@ output_switch output_swi3(
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+
 core core(
             .clk        (clk),
-				.rst_n      (1),
+            .rst_n      (1),
             .io_a       (io_a),
             .io_b       (io_b),
             .force_swi  (force_swi),          
-            .com_swi    (com_swi),   
+            .cmd_swi    (cmd_swi),   
             .error      (error),       
-            .switch     (switch),        
-            .led1       (led1), // cpu A is host
-            .led2       (led2), // cpu B is host
+            .switch     (switch), 
+            
+            .cmd_power_on_A(cmd_power_on_A),
+            .cmd_power_on_B(cmd_power_on_B),
+            .force_power_control_A(force_power_control_A),
+            .force_power_control_B(force_power_control_B),
+				.debug_mode(debug_mode),
+            
+            .CPUA_fail(CPUA_fail),
+				.CPUB_fail(CPUB_fail),
+				
+            .power_on_A_flag(power_on_A_flag), //A机上电上电标志
+            .power_on_B_flag(power_on_B_flag),
+                   
+            .led1       (led1), // signals switch to cpu A
+            .led2       (led2), // signals switch to cpu B
             .led3       (led3), // pwm A correct
             .led4       (led4), // pwm B correct
             .led5       (led5), // command frame error
+				.led6       (led6), // switch board in debug_mode
                 
            .GPIO_A     (GPIO_A),
            .GPIO_B     (GPIO_B),
@@ -370,21 +380,27 @@ command com_identify( .clk(clk),
                .tf_push(tf_push_cpuAB),
                .tdr(tdr_cpuAB),
                .error(error),   // receive an error command
-               .com_swi(com_swi),
-                .reset_A(reset_A),
-                .reset_B(reset_B),
-                .power_on_A(power_on_A),
-                .power_on_B(power_on_B),
+               .cmd_swi(cmd_swi),
+               .reset_A(reset_A),
+               .reset_B(reset_B),
+					
+					.debug_mode(debug_mode),
+                     
+                .cmd_power_on_A(cmd_power_on_A),
+                .cmd_power_on_B(cmd_power_on_B),
+                .force_power_control_A(force_power_control_A),
+                .force_power_control_B(force_power_control_B),
+                     
                 .force_swi(force_swi)
                 );
      
     
 pulse_detection CPU_A_PWM (.clk(clk),
-                            .pwm(1),
+                            .pwm(pwm_a),
                             .io(io_a)
                             );   
 pulse_detection CPU_B_PWM (.clk(clk),
-                            .pwm(1),
+                            .pwm(pwm_b),
                             .io(io_b)
                             );   
                             

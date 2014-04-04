@@ -5,11 +5,22 @@ module core(
             rst_n,
             io_a,
             io_b,
-            force_swi, //指令切换指示，只有==1时切换板才会根据com_swi数据切换电路。否则根据心跳信号自动切换
-            com_swi,   //command_switch,保存指令切换数据, ==0 指令切换到A，==1 切换到B
+            force_swi, //指令切换指示，只有==1时切换板才会根据cmd_swi数据切换电路。否则根据心跳信号自动切换
+            cmd_swi,   //command_switch,保存指令切换数据, ==0 指令切换到A，==1 切换到B
             error,
-          // reset_A,
-          //  reset_B,
+                
+            cmd_power_on_A,
+            cmd_power_on_B,
+            force_power_control_A,
+            force_power_control_B,
+				
+				debug_mode,
+				
+				CPUA_fail,
+				CPUB_fail,
+                
+            power_on_A_flag, //A机上电上电标志
+            power_on_B_flag,
             
             switch,
             
@@ -18,6 +29,7 @@ module core(
             led3,
             led4,
             led5,
+				led6,
                 
             GPIO_A,
             GPIO_B,
@@ -47,10 +59,14 @@ input rst_n;
 input io_a;
 input io_b;
 input force_swi;
-input com_swi;
+input cmd_swi;
 input error;   
-//input reset_A;
-//input reset_B;
+
+input cmd_power_on_A;
+input cmd_power_on_B;
+input force_power_control_A;
+input force_power_control_B;
+input debug_mode;
 
 input tf_push_cpuAB;
 input com_pop;
@@ -75,109 +91,56 @@ output led2;
 output led3;
 output led4;
 output led5;
+output led6;
 
 output GPIO_A;
 output GPIO_B;
 
-
-
 output command_time_out_d;
-
 output switch;           
-
-wire io_a;
-wire io_b;
-assign {led3,led4}={~io_a,~io_b};  
-assign {GPIO_A,GPIO_B}={~switch, switch};  
-
-reg switch= 1'b0;         // switch==0 switch to cpu A;
-                          // switch==1 switch to cpu B;
-
-/////////////// CPU A and CPU B error detection //////////////////
-wire a_error;
-wire b_error;
-reg [7:0] a_err_num = 8'h00;    //  the number of CPU A error
-reg [7:0] b_err_num = 8'h00;
+output power_on_A_flag;
+output power_on_B_flag;
+output CPUA_fail;
+output CPUB_fail;
 
 
-assign a_error = ~io_a;
-assign b_error = ~io_b;
+wire switch;              // switch==0 signals switch to cpu A;
+                          // switch==1 signals switch to cpu B;
+                                  
 
-////detect the rising edge of a_error and b_error
-reg a_error_d1 = 1'b0; // a_error singnal delay 1 clk;
-reg b_error_d1 = 1'b0;
-reg a_error_d2 = 1'b0; // a_error singnal delay 1 clk;
-reg b_error_d2 = 1'b0;
-always@( posedge clk )
- begin
-    a_error_d1 <= a_error;
-    a_error_d2 <= a_error_d1;
-    b_error_d1 <= b_error;
-    b_error_d2 <= b_error_d1;
-end
+/*
+   信号切换与上电控制模块
+*/
 
-always@( posedge clk  )
-begin
-    if(a_error_d1&(~a_error_d2))   //  rising edge of a error
-    a_err_num     <= a_err_num+1;
-    if(b_error_d1&(~b_error_d2))
-    b_err_num     <= b_err_num+1; //   rising edge of b error
+signal_power_control signal_power_control
+   (
+       .clk(clk),
+		 .debug_mode(debug_mode),
+        //// signals switch 
+        .heartbeat_A(io_a),
+        .heartbeat_B(io_b),
+        .cmd_swi(cmd_swi),
+        .force_swi(force_swi),
+        
+        ////power control
+        .cmd_power_on_A(cmd_power_on_A),
+        .cmd_power_on_B(cmd_power_on_B),
+        .force_power_control_A(force_power_control_A),
+        .force_power_control_B(force_power_control_B),
     
-/////////////////counter overflow/////////////////////////////////
-    if((a_err_num==255) || (b_err_num==255)) 
-    begin // prevent  error num overflow
-        if(a_err_num> b_err_num) begin
-          a_err_num <=1;
-          b_err_num <=0;
-        end
-        else begin
-         a_err_num <=0;
-         b_err_num <=1;
-        end
-    end
-/////////////////指令切换将错误次数清0/////
-    if(force_swi) begin
-    a_err_num <= 0;
-    b_err_num <= 0;
-    end
-end
+        
+        ///output signals
+        .switch(switch),
+        .cur_power_on_A_flag( power_on_A_flag),
+        .cur_power_on_B_flag( power_on_B_flag),
+		  
+		  .CPUA_fail(CPUA_fail),
+		  .CPUB_fail(CPUB_fail)
 
-/////////////switch decision/////////////////////////////////////////////////////////
-always@ (a_error or b_error or com_swi or a_err_num or b_err_num)
-begin
-    
-    case({a_error, b_error, com_swi})
-        3'b000: begin
-                    if(force_swi)
-                    switch <=0; 
-                    if(a_err_num > b_err_num)
-                        switch <= 1;
-                    if(a_err_num < b_err_num)
-                        switch <= 0;
-                
-                    
-                    end
-        3'b001: begin
-                    if(force_swi)
-                    switch <= 1;
-                    
-                    if(a_err_num > b_err_num)
-                        switch <= 1;
-                    if(a_err_num < b_err_num)
-                        switch <= 0;
-                    
-                end
-                    
-                    
-        3'b010: switch <= 0;
-        3'b011: switch <= 0;
-        3'b100: switch <= 1;
-        3'b101: switch <= 1;
-        3'b110: switch <= 0;
-        3'b111: switch <= 1;
-    endcase
-    
-end
+    );
+
+
+
 
 
 /////////////led logic //////////////////////////////////////
@@ -190,24 +153,31 @@ end
              led5 off command right
                         */
 
+// 低电平驱动led
 reg led1 = 1'b1;
 reg led2 = 1'b1;
 reg led5 = 1'b1;
+reg led6 = 1'b1;
 wire error;
-always@ (switch or error )
+always@ (switch or error or debug_mode )
 begin
     led1= switch;
     led2= ~switch;
     led5= ~error;
+	 led6= ~debug_mode;
 end
 
+wire io_a;
+wire io_b;
+assign {led3,led4}={~io_a,~io_b};  
+assign {GPIO_A,GPIO_B}={~switch, switch};  
 
 ///////communicate port A or communicate port B send command frame to com_indentify module////// 
 
 reg comm_sel = 1'b0;    
 wire [`UART_FIFO_COUNTER_W-1:0] commA_rf_count;
 wire [`UART_FIFO_COUNTER_W-1:0] commB_rf_count;
-wire commandA_flag;  //连接链路A的rf-push-pulse信号，链??A接收到??数?莺蟾眯藕疟３指叩缙?个clk
+wire commandA_flag;  //连接链路A的rf-push-pulse信号，
 wire commandB_flag;
 
 

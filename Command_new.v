@@ -28,15 +28,17 @@ module command(      clk,
                      tf_push,
                      tdr,
                      error,     // receive an error command
-                     com_swi,   //cmmand swi,com_swi ==0 switch to A else switch to B
+                     cmd_swi,   //cmmand swi,cmd_swi ==0 switch to A else switch to B
                      reset_A,
                      reset_B,
-                     power_on_A,
-                     power_on_B,
-                     data_count,
-                     time_out,
-                     data_flag,
-                     rd_en,
+                            
+                     cmd_power_on_A,
+                     cmd_power_on_B,
+                     force_power_control_A,
+                     force_power_control_B,
+							
+							debug_mode,
+                            
                      force_swi  // force_swi=1 means a switch command is send to switch_board
                     );
 input clk;
@@ -47,29 +49,37 @@ input [`UART_FIFO_COUNTER_W-1:0] rf_counter;
 output rf_pop;
 output tf_push;
 output error;
-output com_swi;         //保存指令切换数据==0说明上次指令为切换到A机，否则是切换到B机
+output cmd_swi;         //保存指令切换数据==0说明上次指令为切换到A机，否则是切换到B机
 output [7:0] tdr;
 output reset_A;        //高电平复位CPU A
 output reset_B;        //高电平复位CPU B
-output power_on_A;
-output power_on_B;
-output force_swi;       //指令切换标志，该标志为1时切换板根据com_swi的数值切换，否则根据AB机心跳和错误次数切换
-output [9:0] data_count;
-output time_out;
-output data_flag;
-output rd_en;
+output cmd_power_on_A;
+output cmd_power_on_B;
+output force_power_control_A;
+output force_power_control_B;
+output force_swi;       //指令切换标志，该标志为1时切换板根据cmd_swi的数值切换，否则根据AB机心跳??错误次数切换
+output debug_mode;
+
 
 reg rf_pop       = 1'b0;
 reg tf_push      = 1'b0;
 reg [7:0] adder  = 8'h00;
-reg com_swi      = 1'b0;
+reg cmd_swi      = 1'b0;
 reg error        = 1'b0;
 reg [7:0] cmd_fifo [7:0]; // fifo store 1 command frame(8 bytes)
 reg reset_a_flag      =1'b0; //复位标志
 reg reset_b_flag      =1'b0;
-reg power_on_A   =1'b1;
-reg power_on_B   =1'b1; 
-reg force_swi    =1'b0;
+reg force_swi         =1'b0;
+
+reg cmd_power_on_A=1;
+reg cmd_power_on_B=0;
+
+reg debug_mode =0;
+
+
+// force_power_control_X 标志位，当该标志位为1时最终的上电控制管脚将按照 cmd_power_on_X的数据进行上电或断电操作
+reg force_power_control_A;
+reg force_power_control_B;
 
 
 wire   data_flag;
@@ -80,10 +90,6 @@ always@(posedge clk)
 begin
   data_flag_d <= data_flag;
 end
-
-
-
-reg time_out=0;
 
 
 wire [7:0] din;
@@ -120,7 +126,7 @@ begin
           wr_en   <=0;
           cycle   <=cycle+1;
        end
-   1: begin   //这个??时是必??的
+   1: begin   //
         cycle <= cycle+1;
       end
      
@@ -167,11 +173,14 @@ begin
         rd_en         <=0;
         force_swi     <=0;
         adder         <=0;
-        reset_a_flag       <=0;
-        reset_b_flag       <=0;
+        reset_a_flag  <=0;
+        reset_b_flag  <=0;
         byte_count    <=0;
-        force_swi     <= 0;
+        force_swi     <=0;
         rst           <=0;
+          
+        force_power_control_A <=0; //指令强制上电或断电A机时，该寄存器为1
+        force_power_control_B <=0;
  
         cmd_fifo[0]       <=0; //控制指令FIFO
         cmd_fifo[1]       <=0;
@@ -188,8 +197,9 @@ begin
             rd_en  <= 1;
             status  <= wait_status;
             end
-            
-          if(command_time_out_d&(data_count!=4'd8)&~data_flag&data_flag_d) //接收到的指令不是8字节,复位??空指令FIFO
+           
+        //接收到的指令不是8字节,复位清空指令FIFO              
+          if(command_time_out_d&(data_count!=4'd8)&~data_flag&data_flag_d) 
             begin
             rst <= 1;
             end
@@ -204,10 +214,10 @@ check_start1: begin
                 end           
                 else begin
                 next_status<=idle; 
-                error  <=1;              // added in 2013-3-7
+                error  <=1;              
                 rst    <=1; 
                 end   
-                status <=wait_status;    // wait_status 是为了满足获取数据时序
+                status <=wait_status;    // wait_status 是为??满足获取数据时序
               end
               
 check_start2:  begin    
@@ -249,18 +259,18 @@ check_frame:
                     begin
                     case(cmd_fifo[4])
                         8'h0a:begin 
-                            com_swi <= 0;
+                            cmd_swi <= 0;
                             force_swi <=1;
                             end
                         8'h0b: begin
-                            com_swi   <= 1;
+                            cmd_swi   <= 1;
                             force_swi <=1;
                              end
                         8'ha0: begin
                             if(switch)                  // CPU A is not working
                                 begin
-                                reset_a_flag <=1;            // reset CPU A
-                                com_swi <=1;            // set CPU B to be the host CPU
+                                reset_a_flag <=1;       // reset CPU A
+                                cmd_swi <=1;            // set CPU B to be the host CPU
                                 end
                                                         // CPU A is working, ignore this command
                             end
@@ -268,46 +278,58 @@ check_frame:
                                 if(~switch) // CPU B is not working
                                 begin
                                 reset_b_flag <=1; // reset CPU B
-                                com_swi <=0; // set CPU A to be the host CPU
+                                cmd_swi <=0; // set CPU A to be the host CPU
                                 end
                                              // CPU B is working, ignore this command
                                 end
                         8'hab: begin
                                     reset_a_flag   <= 1;
                                     reset_b_flag   <= 1;
-                                    com_swi   <= 0;
+                                    cmd_swi   <= 0;
                                     force_swi <= 1;
                                 end
                         8'hba: begin
                                     reset_a_flag   <= 1;
                                     reset_b_flag   <= 1;
-                                    com_swi   <= 1;
-                                    force_swi <= 1;
+                                    cmd_swi        <= 1;
+                                    force_swi      <= 1;
                                 end
                         8'haa: begin             //power on A
-                          
-                                    power_on_A <=1;
+                    
+                                    cmd_power_on_A            <=1;
+                                    force_power_control_A     <=1;
                                     
                                end
                         8'h55: begin
-                                   if(switch)        //CPU A is not host CPU
-                                    power_on_A <= 0; // turn off CPU A
+                                   if(switch) begin        //CPU A is not host CPU
+                                    cmd_power_on_A            <=0; // turn off CPU A
+                                    force_power_control_A     <=1; // force control flag
+                                     end
                                 end
                         8'hbb: begin
                                     //power on B
-                                    power_on_B <=1;                           
+                                    cmd_power_on_B <=1; 
+                                    force_power_control_B <=1;                                              
                                 end
                         8'h44: begin
-                                    if(~switch)      //CPU B is not host CPU
-                                    power_on_B <= 0; // turn off CPU B
+                                    if(~switch)    begin  //CPU B is not host CPU
+                                    cmd_power_on_B <= 0; // turn off CPU B
+                                    force_power_control_B <=1;
+                                     end
                                                 
                                 end
+								8'h11: begin
+								         debug_mode<=1;
+								        end
+								8'h22: begin
+								         debug_mode<=0;
+								        end
                       default: begin
-                            com_swi <=0;
+                            cmd_swi <=0;
                             reset_a_flag <=0;
                             reset_b_flag <=0;
-                            power_on_A <=1;
-                            power_on_B <=1;
+                            cmd_power_on_A <=1;
+                            cmd_power_on_B <=0;
                                end
                     endcase
                   end

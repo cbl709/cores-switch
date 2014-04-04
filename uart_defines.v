@@ -35,6 +35,7 @@
 `define BAUD              38400
 `define DETECTION_TIME    500      //500ms，心跳检测判断时间,状态连续持续DETECTION_TIME ms才能对心跳信号作出判断
 `define GAP_T             38       //帧之间传输间隔时间不小于38字节时间长度，8N1格式。如果格式更改需要在command_new，core文件中相应更改MAX_IDLE_T
+`define FAIL_TIME         10000     //冷备份计算机失效判断时间，但计算机处于上电状态，且无心跳输出超过FAIL_TIME时间判断系统失效，单位ms
 
 
 

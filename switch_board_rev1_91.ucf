@@ -13,7 +13,7 @@ NET led2    LOC =   E11;
 NET led3    LOC =   E10;
 NET led4    LOC =   E9;
 NET led5    LOC =   E8;
-#NET led6    LOC =  E7;
+NET led6    LOC =   E7;
 
 #NET GPIO_A  LOC =   AB15; # CPU A GPIO205
 #NET GPIO_B  LOC =   B14;
@@ -23,11 +23,11 @@ NET  sw1    LOC =   U10;
 NET  sw2    LOC =   E21;
     
 
-NET  power_on_A  LOC = R22;
-NET  power_on_B  LOC = E22;
+NET  power_on_A_pad  LOC = R22;
+NET  power_on_B_pad  LOC = E22;
 
-NET  reset_CPUA LOC = U5;
-NET  reset_CPUB LOC = V4;
+NET  reset_CPUA_pad  LOC = U5;
+NET  reset_CPUB_pad  LOC = V4;
 
 
 # output switch
