@@ -80,7 +80,7 @@ begin
   2'b00: switch_board_info <=32'hab; // cpu AB correct
   2'b01: switch_board_info <=32'haf; // cpu A correct, cpu B fail
   2'b10: switch_board_info <=32'hfb; // cpu A fail, cpu B correct
-  2'h11: switch_board_info <=32'hff; // cpu AB fail
+  2'b11: switch_board_info <=32'hff; // cpu AB fail
   endcase
 end
 

@@ -87,16 +87,28 @@ wire CPUB_fail;
 wire CPUA_fail_flag;
 wire CPUB_fail_flag;
 
+//////////force_power_control_X delay 1clk/////
+reg force_power_control_A_d=0;
+reg force_power_control_B_d=0;
+
+always@(posedge clk)
+begin
+	force_power_control_A_d <= force_power_control_A;
+	force_power_control_B_d <= force_power_control_B;
+end
+
+
+
 /////////counter/////////
 
 always @(posedge clk )
 begin
-    if(CPUA_fail_flag&~force_power_control_A&~debug_mode)
+    if(CPUA_fail_flag&~force_power_control_A&~force_power_control_A_d&~debug_mode)
       cnt_a <= cnt_a+1;
      else
       cnt_a <= 0;
       
-    if(CPUB_fail_flag&~force_power_control_B&~debug_mode)
+    if(CPUB_fail_flag&~force_power_control_B&~force_power_control_B_d&~debug_mode)
       cnt_b <= cnt_b+1;
     else
       cnt_b <= 0;
@@ -125,19 +137,22 @@ begin
     endcase  
 end
 
+
+
 //上电控制操作
 always@(posedge clk)
 begin
 
 ////////////指令强制上电或断电操作////////////
-  if(force_power_control_A|force_power_control_B) begin
-    if(force_power_control_A)
+  if(force_power_control_A|force_power_control_B|force_power_control_A_d|force_power_control_B_d)
+  begin
+    if(force_power_control_A|force_power_control_A_d)
        begin
          A_fail_flag          <=0;
          next_power_on_A_flag <= cmd_power_on_A;
         end
         
-     if(force_power_control_B)
+     if(force_power_control_B|force_power_control_B_d)
       begin
         B_fail_flag <=0;
        next_power_on_B_flag <= cmd_power_on_B;
@@ -158,7 +173,7 @@ begin
              next_power_on_B_flag <=1;
              A_fail_flag          <=1;
               end
-     2'b00: ;
+     2'b11: ;
                                     
      default: ;
     endcase  
